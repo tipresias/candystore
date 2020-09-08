@@ -1,0 +1,4 @@
+# Package dependencies
+setuptools
+wheel
+twine
