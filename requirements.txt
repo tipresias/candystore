@@ -2,3 +2,11 @@
 setuptools
 wheel
 twine
+
+# Testing/Linting
+pylint==2.6.0
+black
+faker
+pydocstyle==5.1.1
+pytest
+mypy>=0.70
