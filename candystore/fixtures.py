@@ -197,7 +197,11 @@ def _generate_round(season_start: datetime, week: int) -> List[FixtureData]:
     teams = (team for team in np.random.permutation(TEAMS))
     venues = (venue for venue in np.random.permutation(VENUES))
 
-    match_data_func = partial(_generate_match, round_number, round_start,)
+    match_data_func = partial(
+        _generate_match,
+        round_number,
+        round_start,
+    )
 
     return [
         match_data_func(
