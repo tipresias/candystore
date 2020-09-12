@@ -19,9 +19,9 @@ jobs:
           python -m pip install --upgrade pip
           pip3 install -r requirements.txt
       - name: Lint
-        run: pylint candystore
+        run: pylint candystore tests
       - name: Check types
-        run: mypy candystore
+        run: mypy candystore tests
       - name: Check documentation
         run: pydocstyle candystore
       - name: Run tests
