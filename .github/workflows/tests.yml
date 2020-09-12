@@ -24,5 +24,7 @@ jobs:
         run: mypy candystore tests
       - name: Check documentation
         run: pydocstyle candystore
+      - name: Check formatting
+        run: black candystore tests --check
       - name: Run tests
         run: pytest
