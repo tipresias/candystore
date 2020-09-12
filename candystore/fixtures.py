@@ -227,7 +227,7 @@ def _generate_season(season: int) -> List[FixtureData]:
     )
 
 
-def generate(seasons: Union[int, SeasonRange] = 1) -> List[FixtureData]:
+def generate_fixtures(seasons: Union[int, SeasonRange] = 1) -> List[FixtureData]:
     """
     Generate fixture data for the given seasons.
 
