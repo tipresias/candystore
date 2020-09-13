@@ -126,6 +126,17 @@ def test_no_duplicate_teams(data):
         assert len(teams) == len(np.unique(teams))
 
 
+def test_no_duplicate_brisbanes(data):
+    data_frame = pd.DataFrame(data)
+
+    # It only has one Brisbane team per round
+    round_groups = data_frame.groupby(["season", "round"])
+    for _, season_round_data_frame in round_groups:
+        teams = season_round_data_frame[["home_team", "away_team"]].to_numpy().flatten()
+        brisbane_teams = np.char.find(teams.astype("U"), "Brisbane") >= 0
+        assert len(teams[brisbane_teams]) == 1
+
+
 def test_date_round_compatibility(data):
     data_frame = pd.DataFrame(data)
 
