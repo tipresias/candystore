@@ -1,5 +1,7 @@
 # candystore
 
+![tests](https://github.com/tipresias/candystore/workflows/tests/badge.svg)
+
 Factories for randomised AFL data sets, selling candy to your unit tests.
 
 The shape and content of the data is based on what's returned by the R package `fitzRoy`, which gets most of its data from the sites [Footywire](https://www.footywire.com/) and [AFLTables](https://afltables.com/afl/afl_index.html). The column names are converted to `snake_case` for convenience.
