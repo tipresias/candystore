@@ -1,6 +1,6 @@
 """For generating fake fixture data."""
 
-from typing import Tuple, Union, List, cast
+from typing import Tuple, Union, List
 from datetime import date, datetime, timedelta
 from itertools import chain
 import math
@@ -45,7 +45,7 @@ MAX_MATCH_HOUR = 20
 WEEK_IN_DAYS = 7
 DAY_IN_HOURS = 24
 
-TEAMS = [
+NON_BRISBANE_TEAMS = [
     "Richmond",
     "Carlton",
     "Melbourne",
@@ -60,13 +60,15 @@ TEAMS = [
     "St Kilda",
     "Hawthorn",
     "Adelaide",
-    "Brisbane Bears",
-    "Brisbane Lions",
     "Gold Coast",
     "Geelong",
     "West Coast",
     "Fitzroy",
     "University",
+]
+BRISBANE_TEAMS = [
+    "Brisbane Bears",
+    "Brisbane Lions",
 ]
 
 VENUES = [
@@ -144,12 +146,21 @@ VENUES = [
 ]
 
 
+def _generate_teams():
+    # We only want one Brisbane team per round, because depending on how team names
+    # are normalised we can end up with duplicate teams, which is invalid.
+    # It seems that there's more consensus on how to handle other teams that moved
+    # or folded.
+    valid_teams = NON_BRISBANE_TEAMS + [np.random.choice(BRISBANE_TEAMS)]
+    return (team for team in np.random.permutation(valid_teams))
+
+
 def _generate_match(
     round_number: int,
     round_start_date: datetime,
     match_number: int,
-    teams: Tuple[str, str] = cast(Tuple[str, str], tuple(np.random.choice(TEAMS, 2))),
-    venue: str = np.random.choice(VENUES),
+    teams: Tuple[str, str],
+    venue: str,
 ) -> FixtureData:
     raw_match_date_time = FAKE.date_time_between_dates(
         datetime_start=round_start_date,
@@ -189,12 +200,12 @@ def _generate_round(season_start: datetime, week: int) -> List[FixtureData]:
     round_start = season_start + timedelta(days=(WEEK_IN_DAYS * week))
     round_number = week + 1
 
-    team_count = len(TEAMS)
+    team_count = len(NON_BRISBANE_TEAMS) + 1
     match_count = math.floor(team_count / 2)
     min_match_number = (week * match_count) + 1
     max_match_number = min_match_number + match_count
 
-    teams = (team for team in np.random.permutation(TEAMS))
+    teams = _generate_teams()
     venues = (venue for venue in np.random.permutation(VENUES))
 
     match_data_func = partial(
