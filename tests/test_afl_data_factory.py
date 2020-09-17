@@ -18,6 +18,28 @@ FIXTURE_COLUMNS = {
     "venue",
 }
 
+BETTING_COLUMNS = {
+    "date",
+    "season",
+    "round_number",
+    "round",
+    "home_team",
+    "away_team",
+    "home_score",
+    "away_score",
+    "home_margin",
+    "away_margin",
+    "home_win_odds",
+    "away_win_odds",
+    "home_win_paid",
+    "away_win_paid",
+    "home_line_odds",
+    "away_line_odds",
+    "home_line_paid",
+    "away_line_paid",
+    "venue",
+}
+
 
 @pytest.fixture
 def int_seasons():
@@ -33,7 +55,7 @@ def tuple_seasons():
 
 
 @pytest.fixture(params=[int, tuple])
-def data(request):
+def data_factory(request):
     if request.param == int:
         seasons = np.random.randint(1, 10)
     elif request.param == tuple:
@@ -43,7 +65,21 @@ def data(request):
     else:
         raise TypeError
 
-    return AFLDataFactory(seasons=seasons).fixtures()
+    return AFLDataFactory(seasons=seasons)
+
+
+@pytest.fixture(params=[int, tuple])
+def betting_odds(request):
+    if request.param == int:
+        seasons = np.random.randint(1, 10)
+    elif request.param == tuple:
+        current_year = date.today().year
+        years = np.random.randint(FIRST_AFL_SEASON, current_year + 1, size=2)
+        seasons = tuple(np.sort(years))
+    else:
+        raise TypeError
+
+    return AFLDataFactory(seasons=seasons).betting_odds()
 
 
 def test_non_postive_seasons():
@@ -105,15 +141,28 @@ def test_tuple_season_count(tuple_seasons):
     assert len(data_frame["season"].drop_duplicates()) == last_season - first_season
 
 
-def test_data_structure(data):
+@pytest.mark.parametrize(
+    [
+        "data_type",
+        "expected_columns",
+    ],
+    [("fixtures", FIXTURE_COLUMNS), ("betting_odds", BETTING_COLUMNS)],
+)
+def test_data_structure(data_factory, data_type, expected_columns):
+    data = getattr(data_factory, data_type)()
     # It returns a list of fixture dictionaries
     assert isinstance(data, list)
     assert isinstance(data[0], dict)
     data_columns = set(data[0].keys())
-    assert FIXTURE_COLUMNS & data_columns == FIXTURE_COLUMNS
+    assert expected_columns & data_columns == expected_columns
 
 
-def test_no_duplicate_teams(data):
+@pytest.mark.parametrize(
+    "data_type",
+    ["fixtures", "betting_odds"],
+)
+def test_no_duplicate_teams(data_factory, data_type):
+    data = getattr(data_factory, data_type)()
     data_frame = pd.DataFrame(data)
 
     # It doesn't have teams play more than once per round
@@ -123,7 +172,12 @@ def test_no_duplicate_teams(data):
         assert len(teams) == len(np.unique(teams))
 
 
-def test_no_duplicate_brisbanes(data):
+@pytest.mark.parametrize(
+    "data_type",
+    ["fixtures", "betting_odds"],
+)
+def test_no_duplicate_brisbanes(data_factory, data_type):
+    data = getattr(data_factory, data_type)()
     data_frame = pd.DataFrame(data)
 
     # It only has one Brisbane team per round
@@ -134,12 +188,20 @@ def test_no_duplicate_brisbanes(data):
         assert len(teams[brisbane_teams]) == 1
 
 
-def test_date_round_compatibility(data):
+@pytest.mark.parametrize(
+    ["data_type", "round_label"],
+    [("fixtures", "round"), ("betting_odds", "round_number")],
+)
+def test_date_round_compatibility(data_factory, data_type, round_label):
+    data = getattr(data_factory, data_type)()
     data_frame = pd.DataFrame(data)
 
     # It has rounds that increment with match dates
     season_groups = data_frame.groupby("season")
     for _, season_data_frame in season_groups:
-        date_sorted_rounds = season_data_frame.sort_values("date")["round"].to_numpy()
-        sorted_rounds = season_data_frame["round"].sort_values().to_numpy()
+        date_sorted_rounds = season_data_frame.sort_values("date")[
+            round_label
+        ].to_numpy()
+        sorted_rounds = season_data_frame[round_label].sort_values().to_numpy()
+
         assert (date_sorted_rounds == sorted_rounds).all()

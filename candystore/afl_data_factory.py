@@ -27,6 +27,31 @@ FixtureData = TypedDict(
     },
 )
 
+BettingData = TypedDict(
+    "BettingData",
+    {
+        "date": datetime,
+        "season": int,
+        "round_number": int,
+        "round": str,
+        "home_team": str,
+        "away_team": str,
+        "home_score": int,
+        "away_score": int,
+        "home_margin": int,
+        "away_margin": int,
+        "home_win_odds": float,
+        "away_win_odds": float,
+        "home_win_paid": float,
+        "away_win_paid": float,
+        "home_line_odds": float,
+        "away_line_odds": float,
+        "home_line_paid": float,
+        "away_line_paid": float,
+        "venue": str,
+    },
+)
+
 BaseMatchData = TypedDict(
     "BaseMatchData",
     {
@@ -58,6 +83,15 @@ MAX_MATCH_HOUR = 20
 
 WEEK_IN_DAYS = 7
 DAY_IN_HOURS = 24
+
+# Score and margin ranges are two standard deviations plus/minus from the means
+# for all recorded AFL matches
+REASONABLE_SCORE_RANGE = (23, 147)
+REASONABLE_MARGIN_RANGE = (0, 88)
+# Roughly the payout when win odds are even
+BASELINE_BET_PAYOUT = 1.92
+# Hand-wavy math to get vaguely realistic win odds
+WIN_ODDS_MULTIPLIER = 0.8
 
 NON_BRISBANE_TEAMS = [
     "Richmond",
@@ -178,7 +212,7 @@ class AFLDataFactory:
         self.seasons = seasons
         self._matches = pd.DataFrame(self._generate_seasons())
 
-    def fixtures(self):
+    def fixtures(self) -> List[FixtureData]:
         """
         Generate fixture data for the given seasons.
 
@@ -189,10 +223,51 @@ class AFLDataFactory:
         """
         return self._matches.pipe(self._convert_to_fixtures).to_dict("records")
 
+    def betting_odds(self) -> List[BettingData]:
+        """
+        Generate betting odds data for the given seasons.
+
+        Returns:
+        --------
+        List of betting odds dictionaries that replicate fitzRoy's
+            `get_footywire_betting_odds` function, but with Pythonic conventions
+            (e.g. snake_case keys)
+        """
+        return self._matches.pipe(self._convert_to_betting_odds).to_dict("records")
+
     @staticmethod
     def _convert_to_fixtures(match_data_frame: pd.DataFrame) -> List[FixtureData]:
         return match_data_frame.assign(
             season_game=lambda df: df.groupby("season").cumcount()
+        )
+
+    @staticmethod
+    def _convert_to_betting_odds(match_data_frame: pd.DataFrame) -> List[BettingData]:
+        home_score, away_score = (
+            np.random.randint(*REASONABLE_SCORE_RANGE),
+            np.random.randint(*REASONABLE_SCORE_RANGE),
+        )
+        home_line_odds = np.random.randint(*REASONABLE_MARGIN_RANGE)
+        win_odds_diff = round((np.random.rand() * WIN_ODDS_MULTIPLIER), 2)
+        home_win_odds_diff = win_odds_diff if home_line_odds > 0 else -1 * win_odds_diff
+        home_win_odds = BASELINE_BET_PAYOUT + home_win_odds_diff
+        away_win_odds = BASELINE_BET_PAYOUT - home_win_odds_diff
+
+        return match_data_frame.assign(
+            round_number=lambda df: df["round"],
+            round=lambda df: "Round " + df["round"].astype(str),
+            home_score=home_score,
+            away_score=away_score,
+            home_margin=home_score - away_score,
+            away_margin=away_score - home_score,
+            home_win_odds=home_win_odds,
+            away_win_odds=away_win_odds,
+            home_win_paid=home_win_odds * int(home_score > away_score),
+            away_win_paid=away_win_odds * int(away_score > home_score),
+            home_line_odds=home_line_odds,
+            away_line_odds=-1 * home_line_odds,
+            home_line_paid=BASELINE_BET_PAYOUT * int(home_score > away_score),
+            away_line_paid=BASELINE_BET_PAYOUT * int(away_score > home_score),
         )
 
     def _generate_seasons(self) -> List[BaseMatchData]:
