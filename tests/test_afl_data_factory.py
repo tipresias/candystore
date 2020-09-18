@@ -150,11 +150,16 @@ def test_tuple_season_count(tuple_seasons):
 )
 def test_data_structure(data_factory, data_type, expected_columns):
     data = getattr(data_factory, data_type)()
+
     # It returns a list of fixture dictionaries
     assert isinstance(data, list)
     assert isinstance(data[0], dict)
     data_columns = set(data[0].keys())
     assert expected_columns & data_columns == expected_columns
+
+    # It returns a data frame
+    data_frame = getattr(data_factory, data_type)(to_dict=None)
+    assert isinstance(data_frame, pd.DataFrame)
 
 
 @pytest.mark.parametrize(

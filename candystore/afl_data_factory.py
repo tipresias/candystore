@@ -1,6 +1,6 @@
 """For generating fake fixture data."""
 
-from typing import Tuple, Union, List
+from typing import Tuple, Union, List, Optional
 from datetime import date, datetime, timedelta
 from itertools import chain
 import math
@@ -212,7 +212,9 @@ class AFLDataFactory:
         self.seasons = seasons
         self._matches = pd.DataFrame(self._generate_seasons())
 
-    def fixtures(self) -> List[FixtureData]:
+    def fixtures(
+        self, to_dict: Optional[str] = "records"
+    ) -> Union[pd.DataFrame, List[FixtureData]]:
         """
         Generate fixture data for the given seasons.
 
@@ -221,9 +223,17 @@ class AFLDataFactory:
         List of fixture dictionaries that replicate fitzRoy's `get_fixture` function,
             but with Pythonic conventions (e.g. snake_case keys)
         """
-        return self._matches.pipe(self._convert_to_fixtures).to_dict("records")
+        fixtures_data_frame = self._matches.pipe(self._convert_to_fixtures)
 
-    def betting_odds(self) -> List[BettingData]:
+        return (
+            fixtures_data_frame
+            if to_dict is None
+            else fixtures_data_frame.to_dict(to_dict)
+        )
+
+    def betting_odds(
+        self, to_dict: Optional[str] = "records"
+    ) -> Union[pd.DataFrame, List[BettingData]]:
         """
         Generate betting odds data for the given seasons.
 
@@ -233,7 +243,13 @@ class AFLDataFactory:
             `get_footywire_betting_odds` function, but with Pythonic conventions
             (e.g. snake_case keys)
         """
-        return self._matches.pipe(self._convert_to_betting_odds).to_dict("records")
+        betting_odds_data_frame = self._matches.pipe(self._convert_to_betting_odds)
+
+        return (
+            betting_odds_data_frame
+            if to_dict is None
+            else betting_odds_data_frame.to_dict(to_dict)
+        )
 
     @staticmethod
     def _convert_to_fixtures(match_data_frame: pd.DataFrame) -> List[FixtureData]:
