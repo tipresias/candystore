@@ -14,6 +14,18 @@ import pandas as pd
 
 SeasonRange = Tuple[int, int]
 
+MatchData = TypedDict(
+    "MatchData",
+    {
+        "date": str,
+        "season": int,
+        "round": int,
+        "home_team": str,
+        "away_team": str,
+        "venue": str,
+    },
+)
+
 FixtureData = TypedDict(
     "FixtureData",
     {
@@ -286,14 +298,14 @@ class CandyStore:
             away_line_paid=BASELINE_BET_PAYOUT * int(away_score > home_score),
         )
 
-    def _generate_seasons(self) -> List[BaseMatchData]:
+    def _generate_seasons(self) -> List[MatchData]:
         return list(
             chain.from_iterable(
                 [self._generate_season(season) for season in self._season_range]
             )
         )
 
-    def _generate_season(self, season: int) -> List[FixtureData]:
+    def _generate_season(self, season: int) -> List[MatchData]:
         # Seasons have typically started in mid-to-late March since the 70s
         start_date = datetime(season, MAR, FIFTEENTH)
         # Typically, rounds start on Thursday or Friday and end on Sunday,
@@ -312,7 +324,7 @@ class CandyStore:
             )
         )
 
-    def _generate_round(self, season_start: datetime, week: int) -> List[FixtureData]:
+    def _generate_round(self, season_start: datetime, week: int) -> List[MatchData]:
         round_start = season_start + timedelta(days=(WEEK_IN_DAYS * week))
         round_number = week + 1
 
@@ -341,7 +353,7 @@ class CandyStore:
         round_start_date: datetime,
         teams: Tuple[str, str],
         venue: str,
-    ) -> FixtureData:
+    ) -> MatchData:
         match_date_time = self._match_date_time(round_start_date)
         home_team, away_team = teams
 
@@ -391,41 +403,40 @@ class CandyStore:
         current_year = date.today().year
 
         if isinstance(self.seasons, int):
-            return self._int_season_range(current_year)
+            return self._int_season_range(self.seasons, current_year)
 
         if isinstance(self.seasons, tuple):
-            return self._tuple_season_range(current_year)
+            return self._tuple_season_range(self.seasons, current_year)
 
         raise TypeError(
             "seasons argument must be either an integer or a tuple of two integers"
         )
 
-    def _int_season_range(self, current_year: int) -> range:
-        assert self.seasons > 0, "Must generate fixture data for at least one season."
+    @staticmethod
+    def _int_season_range(seasons: int, current_year: int) -> range:
+        assert seasons > 0, "Must generate fixture data for at least one season."
 
         # We add 2, because we are open to the possibility of including matches
         # from the current year in the data.
-        max_start_season = current_year - self.seasons + 2
+        max_start_season = current_year - seasons + 2
         start_season = np.random.choice(np.arange(FIRST_AFL_SEASON, max_start_season))
-        end_season = start_season + self.seasons
+        end_season = start_season + seasons
 
         return range(start_season, end_season)
 
-    def _tuple_season_range(self, current_year: int) -> range:
+    @staticmethod
+    def _tuple_season_range(seasons: Tuple[int, int], current_year: int) -> range:
         assert (
-            len(self.seasons) == 2
-        ), f"Must provide two seasons to have a valid range, but {self.seasons} was given."
+            len(seasons) == 2
+        ), f"Must provide two seasons to have a valid range, but {seasons} was given."
 
-        assert (
-            min(self.seasons) >= FIRST_AFL_SEASON
-            and max(self.seasons) <= current_year + 1
-        ), (
+        assert min(seasons) >= FIRST_AFL_SEASON and max(seasons) <= current_year + 1, (
             f"Provided seasons must be in the range of {FIRST_AFL_SEASON} to "
             f"{current_year + 1} (inclusive) to generate valid data."
         )
 
         assert (
-            self.seasons[0] < self.seasons[1]
+            seasons[0] < seasons[1]
         ), "First season must be less than second to create a valid range."
 
-        return range(*self.seasons)
+        return range(*seasons)
