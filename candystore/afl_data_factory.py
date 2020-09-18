@@ -271,47 +271,9 @@ class AFLDataFactory:
         )
 
     def _generate_seasons(self) -> List[BaseMatchData]:
-        current_year = date.today().year
-
-        if isinstance(self.seasons, int):
-            assert (
-                self.seasons > 0
-            ), "Must generate fixture data for at least one season."
-
-            # We add 2, because we are open to the possibility of including matches
-            # from the current year in the data.
-            max_start_season = current_year - self.seasons + 2
-            start_season = np.random.choice(
-                np.arange(FIRST_AFL_SEASON, max_start_season)
-            )
-            end_season = start_season + self.seasons
-            season_range = range(start_season, end_season)
-        elif isinstance(self.seasons, tuple):
-            assert (
-                len(self.seasons) == 2
-            ), f"Must provide two seasons to have a valid range, but {self.seasons} was given."
-
-            assert (
-                min(self.seasons) >= FIRST_AFL_SEASON
-                and max(self.seasons) <= current_year + 1
-            ), (
-                f"Provided seasons must be in the range of {FIRST_AFL_SEASON} to "
-                f"{current_year + 1} (inclusive) to generate valid data."
-            )
-
-            assert (
-                self.seasons[0] < self.seasons[1]
-            ), "First season must be less than second to create a valid range."
-
-            season_range = range(*self.seasons)
-        else:
-            raise TypeError(
-                "seasons argument must be either an integer or a tuple of two integers"
-            )
-
         return list(
             chain.from_iterable(
-                [self._generate_season(season) for season in season_range]
+                [self._generate_season(season) for season in self._season_range]
             )
         )
 
@@ -357,13 +319,27 @@ class AFLDataFactory:
             for _ in range(min_match_number, max_match_number)
         ]
 
-    @staticmethod
     def _generate_match(
+        self,
         round_number: int,
         round_start_date: datetime,
         teams: Tuple[str, str],
         venue: str,
     ) -> FixtureData:
+        match_date_time = self._match_date_time(round_start_date)
+        home_team, away_team = teams
+
+        return {
+            "date": str(match_date_time),
+            "season": match_date_time.year,
+            "round": round_number,
+            "home_team": home_team,
+            "away_team": away_team,
+            "venue": venue,
+        }
+
+    @staticmethod
+    def _match_date_time(round_start_date: datetime) -> datetime:
         raw_match_date_time = FAKE.date_time_between_dates(
             datetime_start=round_start_date,
             datetime_end=(round_start_date + timedelta(days=WEEK_IN_DAYS)),
@@ -379,22 +355,11 @@ class AFLDataFactory:
             ),
         ).time()
 
-        match_date_time = raw_match_date_time.replace(
+        return raw_match_date_time.replace(
             hour=raw_match_time.hour,
             minute=raw_match_time.minute,
             second=raw_match_time.second,
         )
-
-        home_team, away_team = teams
-
-        return {
-            "date": str(match_date_time),
-            "season": match_date_time.year,
-            "round": round_number,
-            "home_team": home_team,
-            "away_team": away_team,
-            "venue": venue,
-        }
 
     @staticmethod
     def _generate_teams():
@@ -404,3 +369,47 @@ class AFLDataFactory:
         # or folded.
         valid_teams = NON_BRISBANE_TEAMS + [np.random.choice(BRISBANE_TEAMS)]
         return (team for team in np.random.permutation(valid_teams))
+
+    @property
+    def _season_range(self) -> range:
+        current_year = date.today().year
+
+        if isinstance(self.seasons, int):
+            return self._int_season_range(current_year)
+
+        if isinstance(self.seasons, tuple):
+            return self._tuple_season_range(current_year)
+
+        raise TypeError(
+            "seasons argument must be either an integer or a tuple of two integers"
+        )
+
+    def _int_season_range(self, current_year: int) -> range:
+        assert self.seasons > 0, "Must generate fixture data for at least one season."
+
+        # We add 2, because we are open to the possibility of including matches
+        # from the current year in the data.
+        max_start_season = current_year - self.seasons + 2
+        start_season = np.random.choice(np.arange(FIRST_AFL_SEASON, max_start_season))
+        end_season = start_season + self.seasons
+
+        return range(start_season, end_season)
+
+    def _tuple_season_range(self, current_year: int) -> range:
+        assert (
+            len(self.seasons) == 2
+        ), f"Must provide two seasons to have a valid range, but {self.seasons} was given."
+
+        assert (
+            min(self.seasons) >= FIRST_AFL_SEASON
+            and max(self.seasons) <= current_year + 1
+        ), (
+            f"Provided seasons must be in the range of {FIRST_AFL_SEASON} to "
+            f"{current_year + 1} (inclusive) to generate valid data."
+        )
+
+        assert (
+            self.seasons[0] < self.seasons[1]
+        ), "First season must be less than second to create a valid range."
+
+        return range(*self.seasons)
