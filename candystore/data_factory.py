@@ -194,8 +194,8 @@ VENUES = [
 ]
 
 
-class AFLDataFactory:
-    """Base class for concrete data factories."""
+class CandyStore:
+    """Data factory for different data sets related to AFL matches."""
 
     def __init__(self, seasons: Union[int, SeasonRange] = 1):
         """

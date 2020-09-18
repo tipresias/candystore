@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from candystore.afl_data_factory import AFLDataFactory, FIRST_AFL_SEASON
+from candystore.data_factory import CandyStore, FIRST_AFL_SEASON
 
 
 FIXTURE_COLUMNS = {
@@ -65,28 +65,14 @@ def data_factory(request):
     else:
         raise TypeError
 
-    return AFLDataFactory(seasons=seasons)
-
-
-@pytest.fixture(params=[int, tuple])
-def betting_odds(request):
-    if request.param == int:
-        seasons = np.random.randint(1, 10)
-    elif request.param == tuple:
-        current_year = date.today().year
-        years = np.random.randint(FIRST_AFL_SEASON, current_year + 1, size=2)
-        seasons = tuple(np.sort(years))
-    else:
-        raise TypeError
-
-    return AFLDataFactory(seasons=seasons).betting_odds()
+    return CandyStore(seasons=seasons)
 
 
 def test_non_postive_seasons():
     # When seasons is <= 0, it raises an exception
     seasons = np.random.randint(-10, 1)
     with pytest.raises(AssertionError, match=r"at least one season"):
-        AFLDataFactory(seasons=seasons)
+        CandyStore(seasons=seasons)
 
 
 def test_too_long_tuple_seasons(tuple_seasons):
@@ -96,7 +82,7 @@ def test_too_long_tuple_seasons(tuple_seasons):
         sorted(tuple_seasons + (np.random.randint(FIRST_AFL_SEASON, current_year + 1),))
     )
     with pytest.raises(AssertionError, match=r"provide two seasons"):
-        AFLDataFactory(seasons=seasons)
+        CandyStore(seasons=seasons)
 
 
 def test_seasons_out_of_range():
@@ -105,26 +91,26 @@ def test_seasons_out_of_range():
     seasons = (FIRST_AFL_SEASON, current_year + 1)
 
     with pytest.raises(AssertionError, match=r"seasons must be in the range"):
-        AFLDataFactory(seasons=(seasons[0] - 1, seasons[1]))
+        CandyStore(seasons=(seasons[0] - 1, seasons[1]))
 
     with pytest.raises(AssertionError, match=r"seasons must be in the range"):
-        AFLDataFactory(seasons=(seasons[0], seasons[1] + 1))
+        CandyStore(seasons=(seasons[0], seasons[1] + 1))
 
 
 def test_seasons_out_of_order(tuple_seasons):
     seasons = tuple(reversed(tuple_seasons))
     with pytest.raises(AssertionError, match=r"First season must be less"):
-        AFLDataFactory(seasons=seasons)
+        CandyStore(seasons=seasons)
 
 
 def test_unknown_seasons_format(tuple_seasons):
     seasons = list(tuple_seasons)
     with pytest.raises(TypeError, match=r"seasons argument must be"):
-        AFLDataFactory(seasons=seasons)
+        CandyStore(seasons=seasons)
 
 
 def test_int_season_count(int_seasons):
-    data = AFLDataFactory(seasons=int_seasons).fixtures()
+    data = CandyStore(seasons=int_seasons).fixtures()
     data_frame = pd.DataFrame(data)
 
     # It generates one season per requested season count
@@ -132,7 +118,7 @@ def test_int_season_count(int_seasons):
 
 
 def test_tuple_season_count(tuple_seasons):
-    data = AFLDataFactory(seasons=tuple_seasons).fixtures()
+    data = CandyStore(seasons=tuple_seasons).fixtures()
     data_frame = pd.DataFrame(data)
 
     first_season, last_season = tuple_seasons
