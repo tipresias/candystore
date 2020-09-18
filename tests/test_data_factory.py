@@ -60,8 +60,9 @@ def data_factory(request):
         seasons = np.random.randint(1, 10)
     elif request.param == tuple:
         current_year = date.today().year
-        years = np.random.randint(FIRST_AFL_SEASON, current_year + 1, size=2)
-        seasons = tuple(np.sort(years))
+        first_year = np.random.randint(FIRST_AFL_SEASON, current_year)
+        second_year = np.random.randint(first_year + 1, current_year + 1)
+        seasons = tuple([first_year, second_year])
     else:
         raise TypeError
 
