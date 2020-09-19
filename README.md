@@ -22,7 +22,9 @@ pip3 install candystore
 ```
 
 ```python
-import candystore
+from candystore import CandyStore
+
+afl_data = CandyStore()
 ```
 
 ## Usage
@@ -36,7 +38,7 @@ All functions for generating data accept a `seasons` argument for defining which
 
 ```python
 
-candystore.generate_fixtures(seasons=1)
+afl_data.fixtures()
 
 [
     {
@@ -57,6 +59,59 @@ candystore.generate_fixtures(seasons=1)
         'home_team': 'University',
         'away_team': 'Brisbane Lions',
         'venue': 'Brunswick St'
+    }
+]
+```
+
+### Betting Odds
+
+```python
+
+afl_data.betting_odds()
+
+[
+    {
+        'date': '1967-03-21 18:40:59',
+        'season': 1967,
+        'round': 'Round 1',
+        'home_team': 'Sydney',
+        'away_team': 'Fremantle',
+        'venue': 'Wellington',
+        'round_number': 1,
+        'home_score': 26,
+        'away_score': 89,
+        'home_margin': -63,
+        'away_margin': 63,
+        'home_win_odds': 2.71,
+        'away_win_odds': 1.13,
+        'home_win_paid': 0.0,
+        'away_win_paid': 1.13,
+        'home_line_odds': 33,
+        'away_line_odds': -33,
+        'home_line_paid': 0.0,
+        'away_line_paid': 1.92
+    },
+    ...
+    {
+        'date': '1967-09-24 18:43:35',
+        'season': 1967,
+        'round': 'Round 28',
+        'home_team': 'Hawthorn',
+        'away_team': 'Greater Western Sydney',
+        'venue': 'Marvel Stadium',
+        'round_number': 28,
+        'home_score': 26,
+        'away_score': 89,
+        'home_margin': -63,
+        'away_margin': 63,
+        'home_win_odds': 2.71,
+        'away_win_odds': 1.13,
+        'home_win_paid': 0.0,
+        'away_win_paid': 1.13,
+        'home_line_odds': 33,
+        'away_line_odds': -33,
+        'home_line_paid': 0.0,
+        'away_line_paid': 1.92
     }
 ]
 ```
