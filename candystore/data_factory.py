@@ -315,12 +315,19 @@ class CandyStore:
         base_match_data_frame: pd.DataFrame,
     ) -> List[BettingData]:
         home_score, away_score = (
-            np.random.randint(*REASONABLE_SCORE_RANGE),
-            np.random.randint(*REASONABLE_SCORE_RANGE),
+            np.random.randint(*REASONABLE_SCORE_RANGE, size=len(base_match_data_frame)),
+            np.random.randint(*REASONABLE_SCORE_RANGE, size=len(base_match_data_frame)),
         )
-        home_line_odds = np.random.randint(*REASONABLE_MARGIN_RANGE)
-        win_odds_diff = round((np.random.rand() * WIN_ODDS_MULTIPLIER), 2)
-        home_win_odds_diff = win_odds_diff if home_line_odds > 0 else -1 * win_odds_diff
+        home_line_odds = np.random.randint(
+            *REASONABLE_MARGIN_RANGE, size=len(base_match_data_frame)
+        )
+        win_odds_diff = np.round(
+            (np.random.rand(len(base_match_data_frame)) * WIN_ODDS_MULTIPLIER),
+            decimals=2,
+        )
+        home_win_odds_diff = np.where(
+            home_line_odds > 0, win_odds_diff, -1 * win_odds_diff
+        )
         home_win_odds = BASELINE_BET_PAYOUT + home_win_odds_diff
         away_win_odds = BASELINE_BET_PAYOUT - home_win_odds_diff
 
@@ -333,13 +340,13 @@ class CandyStore:
             away_margin=away_score - home_score,
             home_win_odds=home_win_odds,
             away_win_odds=away_win_odds,
-            home_win_paid=home_win_odds * int(home_score > away_score),
-            away_win_paid=away_win_odds * int(away_score > home_score),
+            home_win_paid=home_win_odds * (home_score > away_score).astype(int),
+            away_win_paid=away_win_odds * (away_score > home_score).astype(int),
             home_line_odds=home_line_odds,
             away_line_odds=-1 * home_line_odds,
-            home_line_paid=BASELINE_BET_PAYOUT * int(home_score > away_score),
-            away_line_paid=BASELINE_BET_PAYOUT * int(away_score > home_score),
-        )
+            home_line_paid=BASELINE_BET_PAYOUT * (home_score > away_score).astype(int),
+            away_line_paid=BASELINE_BET_PAYOUT * (away_score > home_score).astype(int),
+        ).astype({"date": str})
 
     @staticmethod
     def _convert_to_matches(base_match_data_frame: pd.DataFrame) -> List[MatchData]:
