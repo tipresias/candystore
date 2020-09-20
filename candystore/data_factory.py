@@ -77,7 +77,7 @@ MatchData = TypedDict(
 BaseMatchData = TypedDict(
     "BaseMatchData",
     {
-        "date": str,
+        "date": datetime,
         "season": int,
         "round": int,
         "home_team": str,
@@ -296,7 +296,7 @@ class CandyStore:
     def _convert_to_fixtures(base_match_data_frame: pd.DataFrame) -> List[FixtureData]:
         return base_match_data_frame.assign(
             season_game=lambda df: df.groupby("season").cumcount()
-        )
+        ).astype({'date': str})
 
     @staticmethod
     def _convert_to_betting_odds(
@@ -353,6 +353,7 @@ class CandyStore:
         ) + away_behinds
 
         return base_match_data_frame.assign(
+            date=lambda df: df['date'].dt.date.astype(str),
             game=lambda df: df.groupby("season").cumcount(),
             round_number=lambda df: df["round"],
             round=lambda df: "R" + df["round"].astype(str),
@@ -427,7 +428,7 @@ class CandyStore:
         home_team, away_team = teams
 
         return {
-            "date": str(match_date_time),
+            "date": match_date_time,
             "season": match_date_time.year,
             "round": round_number,
             "home_team": home_team,
