@@ -59,6 +59,68 @@ MATCH_COLUMNS = {
     "venue",
 }
 
+PLAYER_COLUMNS = {
+    "season",
+    "round",
+    "date",
+    "local_start_time",
+    "venue",
+    "attendance",
+    "home_team",
+    "hq1g",
+    "hq1b",
+    "hq2g",
+    "hq2b",
+    "hq3g",
+    "hq3b",
+    "hq4g",
+    "hq4b",
+    "home_score",
+    "away_team",
+    "aw1g",
+    "aw1b",
+    "aw2g",
+    "aw2b",
+    "aw3g",
+    "aw3b",
+    "aw4g",
+    "aw4b",
+    "away_score",
+    "first_name",
+    "surname",
+    "id",
+    "jumper_no",
+    "playing_for",
+    "kicks",
+    "marks",
+    "handballs",
+    "goals",
+    "behinds",
+    "hit_outs",
+    "tackles",
+    "rebounds",
+    "inside_50s",
+    "clearances",
+    "clangers",
+    "frees_for",
+    "frees_against",
+    "brownlow_votes",
+    "contested_possessions",
+    "uncontested_possessions",
+    "contested_marks",
+    "marks_inside_50",
+    "one_percenters",
+    "bounces",
+    "goal_assists",
+    "time_on_ground",
+    "substitute",
+    "umpire_1",
+    "umpire_2",
+    "umpire_3",
+    "umpire_4",
+    "group_id",
+}
+
 
 @pytest.fixture
 def int_seasons():
@@ -73,17 +135,9 @@ def tuple_seasons():
     return tuple(np.sort(seasons))
 
 
-@pytest.fixture(params=[int, tuple])
-def data_factory(request):
-    if request.param == int:
-        seasons = np.random.randint(1, 10)
-    elif request.param == tuple:
-        current_year = date.today().year
-        first_year = np.random.randint(FIRST_AFL_SEASON, current_year)
-        second_year = np.random.randint(first_year + 1, current_year + 1)
-        seasons = tuple([first_year, second_year])
-    else:
-        raise TypeError
+@pytest.fixture()
+def data_factory():
+    seasons = np.random.randint(1, 10)
 
     return CandyStore(seasons=seasons)
 
@@ -156,6 +210,7 @@ def test_tuple_season_count(tuple_seasons):
         ("fixtures", FIXTURE_COLUMNS),
         ("betting_odds", BETTING_COLUMNS),
         ("match_results", MATCH_COLUMNS),
+        ("players", PLAYER_COLUMNS),
     ],
 )
 def test_data_structure(data_factory, data_type, expected_columns):
@@ -209,6 +264,7 @@ def test_no_duplicate_brisbanes(data_factory, data_type):
         ("fixtures", "round"),
         ("betting_odds", "round_number"),
         ("match_results", "round_number"),
+        ("players", "round"),
     ],
 )
 def test_date_round_compatibility(data_factory, data_type, round_label):
