@@ -14,18 +14,6 @@ import pandas as pd
 
 SeasonRange = Tuple[int, int]
 
-MatchData = TypedDict(
-    "MatchData",
-    {
-        "date": str,
-        "season": int,
-        "round": int,
-        "home_team": str,
-        "away_team": str,
-        "venue": str,
-    },
-)
-
 FixtureData = TypedDict(
     "FixtureData",
     {
