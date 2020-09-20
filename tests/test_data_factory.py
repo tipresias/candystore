@@ -40,6 +40,25 @@ BETTING_COLUMNS = {
     "venue",
 }
 
+MATCH_COLUMNS = {
+    "date",
+    "game",
+    "season",
+    "round",
+    "round_number",
+    "round_type",
+    "home_team",
+    "home_goals",
+    "home_behinds",
+    "home_points",
+    "away_team",
+    "away_goals",
+    "away_behinds",
+    "away_points",
+    "margin",
+    "venue",
+}
+
 
 @pytest.fixture
 def int_seasons():
@@ -133,7 +152,11 @@ def test_tuple_season_count(tuple_seasons):
         "data_type",
         "expected_columns",
     ],
-    [("fixtures", FIXTURE_COLUMNS), ("betting_odds", BETTING_COLUMNS)],
+    [
+        ("fixtures", FIXTURE_COLUMNS),
+        ("betting_odds", BETTING_COLUMNS),
+        ("match_results", MATCH_COLUMNS),
+    ],
 )
 def test_data_structure(data_factory, data_type, expected_columns):
     data = getattr(data_factory, data_type)()
@@ -151,7 +174,7 @@ def test_data_structure(data_factory, data_type, expected_columns):
 
 @pytest.mark.parametrize(
     "data_type",
-    ["fixtures", "betting_odds"],
+    ["fixtures", "betting_odds", "match_results"],
 )
 def test_no_duplicate_teams(data_factory, data_type):
     data = getattr(data_factory, data_type)()
@@ -166,7 +189,7 @@ def test_no_duplicate_teams(data_factory, data_type):
 
 @pytest.mark.parametrize(
     "data_type",
-    ["fixtures", "betting_odds"],
+    ["fixtures", "betting_odds", "match_results"],
 )
 def test_no_duplicate_brisbanes(data_factory, data_type):
     data = getattr(data_factory, data_type)()
@@ -182,7 +205,11 @@ def test_no_duplicate_brisbanes(data_factory, data_type):
 
 @pytest.mark.parametrize(
     ["data_type", "round_label"],
-    [("fixtures", "round"), ("betting_odds", "round_number")],
+    [
+        ("fixtures", "round"),
+        ("betting_odds", "round_number"),
+        ("match_results", "round_number"),
+    ],
 )
 def test_date_round_compatibility(data_factory, data_type, round_label):
     data = getattr(data_factory, data_type)()

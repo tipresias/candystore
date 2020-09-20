@@ -64,6 +64,28 @@ BettingData = TypedDict(
     },
 )
 
+MatchData = TypedDict(
+    "MatchData",
+    {
+        "date": str,
+        "game": int,
+        "season": int,
+        "round": str,
+        "round_number": int,
+        "round_type": str,
+        "home_team": str,
+        "home_goals": int,
+        "home_behinds": int,
+        "home_points": int,
+        "away_team": str,
+        "away_goals": int,
+        "away_behinds": int,
+        "away_points": int,
+        "margin": int,
+        "venue": str,
+    },
+)
+
 BaseMatchData = TypedDict(
     "BaseMatchData",
     {
@@ -96,10 +118,12 @@ MAX_MATCH_HOUR = 20
 WEEK_IN_DAYS = 7
 DAY_IN_HOURS = 24
 
-# Score and margin ranges are two standard deviations plus/minus from the means
+# Reasonable ranges are two standard deviations plus/minus from the means
 # for all recorded AFL matches
 REASONABLE_SCORE_RANGE = (23, 147)
 REASONABLE_MARGIN_RANGE = (0, 88)
+REASONABLE_GOAL_RANGE = (2, 22)
+REASONABLE_BEHIND_RANGE = (3, 21)
 # Roughly the payout when win odds are even
 BASELINE_BET_PAYOUT = 1.92
 # Hand-wavy math to get vaguely realistic win odds
@@ -222,7 +246,7 @@ class CandyStore:
             (same rules as Python's `range`).
         """
         self.seasons = seasons
-        self._matches = pd.DataFrame(self._generate_seasons())
+        self._base_matches = pd.DataFrame(self._generate_seasons())
 
     def fixtures(
         self, to_dict: Optional[str] = "records"
@@ -235,7 +259,7 @@ class CandyStore:
         List of fixture dictionaries that replicate fitzRoy's `get_fixture` function,
             but with Pythonic conventions (e.g. snake_case keys)
         """
-        fixtures_data_frame = self._matches.pipe(self._convert_to_fixtures)
+        fixtures_data_frame = self._base_matches.pipe(self._convert_to_fixtures)
 
         return (
             fixtures_data_frame
@@ -255,7 +279,7 @@ class CandyStore:
             `get_footywire_betting_odds` function, but with Pythonic conventions
             (e.g. snake_case keys)
         """
-        betting_odds_data_frame = self._matches.pipe(self._convert_to_betting_odds)
+        betting_odds_data_frame = self._base_matches.pipe(self._convert_to_betting_odds)
 
         return (
             betting_odds_data_frame
@@ -263,14 +287,33 @@ class CandyStore:
             else betting_odds_data_frame.to_dict(to_dict)
         )
 
+    def match_results(
+        self, to_dict: Optional[str] = "records"
+    ) -> Union[pd.DataFrame, List[MatchData]]:
+        """
+        Generate match results data data for the given seasons.
+
+        Returns:
+        --------
+        Match data that replicate fitzRoy's `get_match_results` function,
+            but with Pythonic conventions (e.g. snake_case keys)
+        """
+        match_data_frame = self._base_matches.pipe(self._convert_to_matches)
+
+        return (
+            match_data_frame if to_dict is None else match_data_frame.to_dict(to_dict)
+        )
+
     @staticmethod
-    def _convert_to_fixtures(match_data_frame: pd.DataFrame) -> List[FixtureData]:
-        return match_data_frame.assign(
+    def _convert_to_fixtures(base_match_data_frame: pd.DataFrame) -> List[FixtureData]:
+        return base_match_data_frame.assign(
             season_game=lambda df: df.groupby("season").cumcount()
         )
 
     @staticmethod
-    def _convert_to_betting_odds(match_data_frame: pd.DataFrame) -> List[BettingData]:
+    def _convert_to_betting_odds(
+        base_match_data_frame: pd.DataFrame,
+    ) -> List[BettingData]:
         home_score, away_score = (
             np.random.randint(*REASONABLE_SCORE_RANGE),
             np.random.randint(*REASONABLE_SCORE_RANGE),
@@ -281,7 +324,7 @@ class CandyStore:
         home_win_odds = BASELINE_BET_PAYOUT + home_win_odds_diff
         away_win_odds = BASELINE_BET_PAYOUT - home_win_odds_diff
 
-        return match_data_frame.assign(
+        return base_match_data_frame.assign(
             round_number=lambda df: df["round"],
             round=lambda df: "Round " + df["round"].astype(str),
             home_score=home_score,
@@ -298,14 +341,45 @@ class CandyStore:
             away_line_paid=BASELINE_BET_PAYOUT * int(away_score > home_score),
         )
 
-    def _generate_seasons(self) -> List[MatchData]:
+    @staticmethod
+    def _convert_to_matches(base_match_data_frame: pd.DataFrame) -> List[MatchData]:
+        match_count = len(base_match_data_frame)
+
+        home_goals, away_goals = (
+            np.random.randint(*REASONABLE_GOAL_RANGE, size=match_count),
+            np.random.randint(*REASONABLE_GOAL_RANGE, size=match_count),
+        )
+        home_behinds, away_behinds = (
+            np.random.randint(*REASONABLE_BEHIND_RANGE, size=match_count),
+            np.random.randint(*REASONABLE_BEHIND_RANGE, size=match_count),
+        )
+        home_points, away_points = (home_goals * 6) + home_behinds, (
+            away_goals * 6
+        ) + away_behinds
+
+        return base_match_data_frame.assign(
+            game=lambda df: df.groupby("season").cumcount(),
+            round_number=lambda df: df["round"],
+            round=lambda df: "R" + df["round"].astype(str),
+            round_type="Regular",
+            home_goals=home_goals,
+            home_behinds=home_behinds,
+            home_points=home_points,
+            away_goals=away_goals,
+            away_behinds=away_behinds,
+            away_points=away_points,
+            # fitzRoy gets the margin by always subtracting away points from home points
+            margin=home_points - away_points,
+        )
+
+    def _generate_seasons(self) -> List[BaseMatchData]:
         return list(
             chain.from_iterable(
                 [self._generate_season(season) for season in self._season_range]
             )
         )
 
-    def _generate_season(self, season: int) -> List[MatchData]:
+    def _generate_season(self, season: int) -> List[BaseMatchData]:
         # Seasons have typically started in mid-to-late March since the 70s
         start_date = datetime(season, MAR, FIFTEENTH)
         # Typically, rounds start on Thursday or Friday and end on Sunday,
@@ -324,7 +398,7 @@ class CandyStore:
             )
         )
 
-    def _generate_round(self, season_start: datetime, week: int) -> List[MatchData]:
+    def _generate_round(self, season_start: datetime, week: int) -> List[BaseMatchData]:
         round_start = season_start + timedelta(days=(WEEK_IN_DAYS * week))
         round_number = week + 1
 
@@ -353,7 +427,7 @@ class CandyStore:
         round_start_date: datetime,
         teams: Tuple[str, str],
         venue: str,
-    ) -> MatchData:
+    ) -> BaseMatchData:
         match_date_time = self._match_date_time(round_start_date)
         home_team, away_team = teams
 
