@@ -19,12 +19,17 @@ jobs:
           python -m pip install --upgrade pip
           pip3 install -r requirements.txt
       - name: Lint
+        if: ${{ always() }}
         run: pylint candystore tests
       - name: Check types
+        if: ${{ always() }}
         run: mypy candystore tests
       - name: Check documentation
+        if: ${{ always() }}
         run: pydocstyle candystore
       - name: Check formatting
+        if: ${{ always() }}
         run: black candystore tests --check
       - name: Run tests
+        if: ${{ always() }}
         run: pytest
