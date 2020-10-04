@@ -1,6 +1,8 @@
 # candystore
 
 ![tests](https://github.com/tipresias/candystore/workflows/tests/badge.svg)
+[![Documentation Status](https://readthedocs.org/projects/candystore/badge/?version=latest)](https://candystore.readthedocs.io/en/latest/?badge=latest)
+
 
 Factories for randomised AFL data sets, selling candy to your unit tests.
 
