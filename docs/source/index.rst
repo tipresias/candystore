@@ -5,7 +5,7 @@ Welcome to CandyStore's documentation!
   :maxdepth: 2
   :caption: Contents:
 
-  code
+  api/classes
 
 
 Indices and tables

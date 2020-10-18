@@ -319,15 +319,18 @@ class CandyStore:
 
     def __init__(self, seasons: Union[int, SeasonRange] = 1):
         """
-        Instantiate the data generator.
-
-        Params:
-        -------
-        seasons: The seasons to generate data for.
-            If an integer, will start from a random year for which AFL data exists
-            and increment for the given number of years.
-            If a tuple of integers, will generate fixtures for the given range of years
+        Parameters
+        ----------
+        seasons
+            The seasons to generate data for. If an integer, will start from a random\
+            year for which AFL data exists and increment for the given number of years.\
+            If a tuple of integers, will generate fixtures for the given range of years\
             (same rules as Python's `range`).
+
+        Attributes
+        ----------
+        seasons
+            The seasons for which fake data is generated.
         """
         self.seasons = seasons
         self._base_matches = pd.DataFrame(self._generate_seasons())
@@ -335,13 +338,19 @@ class CandyStore:
     def fixtures(
         self, to_dict: Optional[str] = "records"
     ) -> Union[pd.DataFrame, List[FixtureData]]:
-        """
-        Generate fixture data for the given seasons.
+        """Generate fixture data for the given seasons.
 
-        Returns:
-        --------
-        List of fixture dictionaries that replicate fitzRoy's `get_fixture` function,
-            but with Pythonic conventions (e.g. snake_case keys)
+        Parameters
+        ----------
+        to_dict
+            Type of dictionary data to return (passed directly to Panda's `to_dict`\
+            method). `None` returns a DataFrame.
+
+        Returns
+        -------
+        pd.DataFrame or list(dict)
+            List of fixture dictionaries that replicate fitzRoy's `get_fixture`\
+            function, but with Pythonic conventions (e.g. snake_case keys)
         """
         fixtures_data_frame = self._base_matches.pipe(self._convert_to_fixtures)
 
@@ -354,13 +363,19 @@ class CandyStore:
     def betting_odds(
         self, to_dict: Optional[str] = "records"
     ) -> Union[pd.DataFrame, List[BettingData]]:
-        """
-        Generate betting odds data for the given seasons.
+        """Generate betting odds data for the given seasons.
 
-        Returns:
-        --------
-        List of betting odds dictionaries that replicate fitzRoy's
-            `get_footywire_betting_odds` function, but with Pythonic conventions
+        Parameters
+        ----------
+        to_dict
+            Type of dictionary data to return (passed directly to Panda's `to_dict`\
+            method). `None` returns a DataFrame.
+
+        Returns
+        -------
+        pd.DataFrame or list(dict)
+            List of betting odds dictionaries that replicate fitzRoy's\
+            `get_footywire_betting_odds` function, but with Pythonic conventions\
             (e.g. snake_case keys)
         """
         betting_odds_data_frame = self._base_matches.pipe(self._convert_to_betting_odds)
@@ -374,12 +389,18 @@ class CandyStore:
     def match_results(
         self, to_dict: Optional[str] = "records"
     ) -> Union[pd.DataFrame, List[MatchData]]:
-        """
-        Generate match results data data for the given seasons.
+        """Generate match results data data for the given seasons.
 
-        Returns:
-        --------
-        Match data that replicate fitzRoy's `get_match_results` function,
+        Parameters
+        ----------
+        to_dict
+            Type of dictionary data to return (passed directly to Panda's `to_dict`\
+            method). `None` returns a DataFrame.
+
+        Returns
+        -------
+        pd.DataFrame or list(dict)
+            Match data that replicate fitzRoy's `get_match_results` function,\
             but with Pythonic conventions (e.g. snake_case keys)
         """
         match_data_frame = self._base_matches.pipe(self._convert_to_matches)
@@ -391,12 +412,18 @@ class CandyStore:
     def players(
         self, to_dict: Optional[str] = "records"
     ) -> Union[pd.DataFrame, List[PlayerData]]:
-        """
-        Generate player data data for the given seasons.
+        """Generate player data data for the given seasons.
 
-        Returns:
-        --------
-        Player data that replicate fitzRoy's `get_afltables_stats` function,
+        Parameters
+        ----------
+        to_dict
+            Type of dictionary data to return (passed directly to Panda's `to_dict`\
+            method). `None` returns a DataFrame.
+
+        Returns
+        -------
+        pd.DataFrame or list(dict)
+            Player data that replicate fitzRoy's `get_afltables_stats` function,\
             but with Pythonic conventions (e.g. snake_case keys)
         """
         player_data_frame = self._base_matches.pipe(self._convert_to_players)
