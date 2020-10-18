@@ -10,7 +10,6 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 
 Factories for randomised AFL data sets, selling candy to your unit tests.
@@ -25,10 +24,10 @@ Features
 
 - Randomised values for the following AFL data sets:
 
-  - `fixtures`: Minimal AFL match data from the season schedule.
-  - `match_results`: Full match data, including results.
-  - `betting_odds`: Minimal match data with pre-game odds for the final result.
-  - `players`: Full set of player stats for each match.
+  - :code:`fixtures`: Minimal AFL match data from the season schedule.
+  - :code:`match_results`: Full match data, including results.
+  - :code:`betting_odds`: Minimal match data with pre-game odds for the final result.
+  - :code:`players`: Full set of player stats for each match.
 
 - Some limitations on the randomness of the data to make data sets realistic:
 
