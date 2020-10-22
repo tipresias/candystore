@@ -1,7 +1,7 @@
-numpy>=1.0,<2.0
-pandas>=0.24.0,<2.0
+# candystore dependencies from setup.py
+-e .
 
-# Package dependencies
+# Package building dependencies
 setuptools
 wheel
 twine
@@ -10,7 +10,5 @@ sphinx
 # Testing/Linting
 pylint>=2.0,<3.0
 black==20.8b1
-faker>=4.0,<5.0
 pydocstyle>=5.0,<6.0
 pytest>=5.0,<6.0
-mypy>=0.70,<1.0

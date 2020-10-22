@@ -15,7 +15,12 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/tipresias/candystore",
     packages=setuptools.find_packages(),
-    install_requires=["numpy>=1.0,<2.0", "pandas>=0.24.0,<2.0"],
+    install_requires=[
+        "numpy>=1.0,<2.0",
+        "pandas>=0.24.0,<2.0",
+        "faker>=4.0,<5.0",
+        "mypy>=0.70,<1.0",
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
