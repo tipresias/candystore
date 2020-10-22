@@ -12,3 +12,4 @@ pylint>=2.0,<3.0
 black==20.8b1
 pydocstyle>=5.0,<6.0
 pytest>=5.0,<6.0
+coverage
