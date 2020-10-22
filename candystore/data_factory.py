@@ -354,15 +354,17 @@ class CandyStore:
 
         Examples
         --------
-        {
-            "date": "1967-03-16 12:37:19",
-            "season": 1967,
-            "season_game": 1,
-            "round": 1,
-            "home_team": "Melbourne",
-            "away_team": "Brisbane Lions",
-            "venue": "Sydney Showground"
-        }
+        .. code-block:: python
+
+            {
+                "date": "1967-03-16 12:37:19",
+                "season": 1967,
+                "season_game": 1,
+                "round": 1,
+                "home_team": "Melbourne",
+                "away_team": "Brisbane Lions",
+                "venue": "Sydney Showground"
+            }
         """
         fixtures_data_frame = self._base_matches.pipe(self._convert_to_fixtures)
 
@@ -392,27 +394,29 @@ class CandyStore:
 
         Examples
         --------
-        {
-            "date": "1967-03-21 18:40:59",
-            "season": 1967,
-            "round": "Round 1",
-            "home_team": "Sydney",
-            "away_team": "Fremantle",
-            "venue": "Wellington",
-            "round_number": 1,
-            "home_score": 26,
-            "away_score": 89,
-            "home_margin": -63,
-            "away_margin": 63,
-            "home_win_odds": 2.71,
-            "away_win_odds": 1.13,
-            "home_win_paid": 0.0,
-            "away_win_paid": 1.13,
-            "home_line_odds": 33,
-            "away_line_odds": -33,
-            "home_line_paid": 0.0,
-            "away_line_paid": 1.92
-        }
+        .. code-block:: python
+
+            {
+                "date": "1967-03-21 18:40:59",
+                "season": 1967,
+                "round": "Round 1",
+                "home_team": "Sydney",
+                "away_team": "Fremantle",
+                "venue": "Wellington",
+                "round_number": 1,
+                "home_score": 26,
+                "away_score": 89,
+                "home_margin": -63,
+                "away_margin": 63,
+                "home_win_odds": 2.71,
+                "away_win_odds": 1.13,
+                "home_win_paid": 0.0,
+                "away_win_paid": 1.13,
+                "home_line_odds": 33,
+                "away_line_odds": -33,
+                "home_line_paid": 0.0,
+                "away_line_paid": 1.92
+            }
         """
         betting_odds_data_frame = self._base_matches.pipe(self._convert_to_betting_odds)
 
@@ -441,24 +445,26 @@ class CandyStore:
 
         Examples
         --------
-        {
-            "date": "1933-03-18",
-            "season": 1933,
-            "round": "R1",
-            "home_team": "Gold Coast",
-            "away_team": "Adelaide",
-            "venue": "Princes Park",
-            "game": 0,
-            "round_number": 1,
-            "round_type": "Regular",
-            "home_goals": 2,
-            "home_behinds": 11,
-            "home_points": 23,
-            "away_goals": 21,
-            "away_behinds": 17,
-            "away_points": 143,
-            "margin": -120
-        }
+        .. code-block:: python
+
+            {
+                "date": "1933-03-18",
+                "season": 1933,
+                "round": "R1",
+                "home_team": "Gold Coast",
+                "away_team": "Adelaide",
+                "venue": "Princes Park",
+                "game": 0,
+                "round_number": 1,
+                "round_type": "Regular",
+                "home_goals": 2,
+                "home_behinds": 11,
+                "home_points": 23,
+                "away_goals": 21,
+                "away_behinds": 17,
+                "away_points": 143,
+                "margin": -120
+            }
         """
         match_data_frame = self._base_matches.pipe(self._convert_to_matches)
 
@@ -485,67 +491,69 @@ class CandyStore:
 
         Examples
         --------
-        {
-            "date": "1933-03-18",
-            "season": 1933,
-            "round": 1,
-            "home_team": "Gold Coast",
-            "away_team": "Adelaide",
-            "venue": "Princes Park",
-            "local_start_time": 1437,
-            "attendance": 42853,
-            "hq1g": 3,
-            "hq1b": 3,
-            "hq2g": 2,
-            "hq2b": 1,
-            "hq3g": 1,
-            "hq3b": 5,
-            "hq4g": 3,
-            "hq4b": 4,
-            "home_score": 67,
-            "aw1g": 1,
-            "aw1b": 2,
-            "aw2g": 5,
-            "aw2b": 1,
-            "aw3g": 0,
-            "aw3b": 1,
-            "aw4g": 2,
-            "aw4b": 1,
-            "away_score": 67,
-            "umpire_1": "William Mayo",
-            "umpire_2": "Justin Washington",
-            "umpire_3": "Brian Nicholson",
-            "umpire_4": "Barbara Lamb",
-            "group_id": 353,
-            "first_name": "Elizabeth",
-            "surname": "Lewis",
-            "id": 0,
-            "jumper_no": 18,
-            "playing_for": "Gold Coast",
-            "kicks": 6,
-            "marks": 8,
-            "handballs": 10,
-            "goals": 1,
-            "behinds": 0,
-            "hit_outs": 10,
-            "tackles": 3,
-            "rebounds": 4,
-            "inside_50s": 4,
-            "clearances": 2,
-            "clangers": 0,
-            "frees_for": 3,
-            "frees_against": 4,
-            "brownlow_votes": 1,
-            "contested_possessions": 2,
-            "uncontested_possessions": 6,
-            "contested_marks": 2,
-            "marks_inside_50": 1,
-            "one_percenters": 3,
-            "bounces": 2,
-            "goal_assists": 0,
-            "time_on_ground": 14,
-            "substitute": 1
-        }
+        .. code-block:: python
+
+            {
+                "date": "1933-03-18",
+                "season": 1933,
+                "round": 1,
+                "home_team": "Gold Coast",
+                "away_team": "Adelaide",
+                "venue": "Princes Park",
+                "local_start_time": 1437,
+                "attendance": 42853,
+                "hq1g": 3,
+                "hq1b": 3,
+                "hq2g": 2,
+                "hq2b": 1,
+                "hq3g": 1,
+                "hq3b": 5,
+                "hq4g": 3,
+                "hq4b": 4,
+                "home_score": 67,
+                "aw1g": 1,
+                "aw1b": 2,
+                "aw2g": 5,
+                "aw2b": 1,
+                "aw3g": 0,
+                "aw3b": 1,
+                "aw4g": 2,
+                "aw4b": 1,
+                "away_score": 67,
+                "umpire_1": "William Mayo",
+                "umpire_2": "Justin Washington",
+                "umpire_3": "Brian Nicholson",
+                "umpire_4": "Barbara Lamb",
+                "group_id": 353,
+                "first_name": "Elizabeth",
+                "surname": "Lewis",
+                "id": 0,
+                "jumper_no": 18,
+                "playing_for": "Gold Coast",
+                "kicks": 6,
+                "marks": 8,
+                "handballs": 10,
+                "goals": 1,
+                "behinds": 0,
+                "hit_outs": 10,
+                "tackles": 3,
+                "rebounds": 4,
+                "inside_50s": 4,
+                "clearances": 2,
+                "clangers": 0,
+                "frees_for": 3,
+                "frees_against": 4,
+                "brownlow_votes": 1,
+                "contested_possessions": 2,
+                "uncontested_possessions": 6,
+                "contested_marks": 2,
+                "marks_inside_50": 1,
+                "one_percenters": 3,
+                "bounces": 2,
+                "goal_assists": 0,
+                "time_on_ground": 14,
+                "substitute": 1
+            }
         """
         player_data_frame = self._base_matches.pipe(self._convert_to_players)
 
