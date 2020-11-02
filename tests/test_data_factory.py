@@ -21,7 +21,6 @@ FIXTURE_COLUMNS = {
 BETTING_COLUMNS = {
     "date",
     "season",
-    "round_number",
     "round",
     "home_team",
     "away_team",
@@ -262,7 +261,7 @@ def test_no_duplicate_brisbanes(data_factory, data_type):
     ["data_type", "round_label"],
     [
         ("fixtures", "round"),
-        ("betting_odds", "round_number"),
+        ("betting_odds", "round"),
         ("match_results", "round_number"),
         ("players", "round"),
     ],

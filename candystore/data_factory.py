@@ -32,8 +32,7 @@ BettingData = TypedDict(
     {
         "date": datetime,
         "season": int,
-        "round_number": int,
-        "round": str,
+        "round": int,
         "home_team": str,
         "away_team": str,
         "home_score": int,
@@ -399,11 +398,10 @@ class CandyStore:
             {
                 "date": "1967-03-21 18:40:59",
                 "season": 1967,
-                "round": "Round 1",
                 "home_team": "Sydney",
                 "away_team": "Fremantle",
                 "venue": "Wellington",
-                "round_number": 1,
+                "round": 1,
                 "home_score": 26,
                 "away_score": 89,
                 "home_margin": -63,
@@ -589,8 +587,6 @@ class CandyStore:
         away_win_odds = BASELINE_BET_PAYOUT - home_win_odds_diff
 
         return base_match_data_frame.assign(
-            round_number=lambda df: df["round"],
-            round=lambda df: "Round " + df["round"].astype(str),
             home_score=home_score,
             away_score=away_score,
             home_margin=home_score - away_score,
@@ -600,7 +596,7 @@ class CandyStore:
             home_win_paid=home_win_odds * (home_score > away_score).astype(int),
             away_win_paid=away_win_odds * (away_score > home_score).astype(int),
             home_line_odds=home_line_odds,
-            away_line_odds=-1 * home_line_odds,
+            away_line_odds=home_line_odds * -1,
             home_line_paid=BASELINE_BET_PAYOUT * (home_score > away_score).astype(int),
             away_line_paid=BASELINE_BET_PAYOUT * (away_score > home_score).astype(int),
         ).astype({"date": str})
