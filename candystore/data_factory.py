@@ -604,8 +604,9 @@ class CandyStore:
             away_line_paid=BASELINE_BET_PAYOUT * (away_score > home_score).astype(int),
         ).astype({"date": str})
 
-    @staticmethod
-    def _convert_to_matches(base_match_data_frame: pd.DataFrame) -> List[MatchData]:
+    def _convert_to_matches(
+        self, base_match_data_frame: pd.DataFrame
+    ) -> List[MatchData]:
         match_count = len(base_match_data_frame)
 
         home_goals, away_goals = (
@@ -623,9 +624,9 @@ class CandyStore:
         return base_match_data_frame.assign(
             date=lambda df: df["date"].dt.date.astype(str),
             game=lambda df: df.groupby("season").cumcount(),
+            round_type=self._map_round_type,
             round_number=lambda df: df["round"],
             round=lambda df: "R" + df["round"].astype(str),
-            round_type="Regular",
             home_goals=home_goals,
             home_behinds=home_behinds,
             home_points=home_points,
@@ -635,6 +636,30 @@ class CandyStore:
             # fitzRoy gets the margin by always subtracting away points from home points
             margin=home_points - away_points,
         )
+
+    def _map_round_type(self, match_data_frame: pd.DataFrame) -> pd.Series:
+        return pd.concat(
+            [
+                self._map_round_type_per_season(season_group)
+                for _season, season_group in match_data_frame.groupby("season")
+            ]
+        )
+
+    def _map_round_type_per_season(self, season_group: pd.DataFrame) -> pd.Series:
+        max_round = season_group["round"].max()
+        finals_round_map = self._season_round_type_map(max_round)
+
+        return season_group["round"].map(
+            lambda round: finals_round_map.get(round) or "Regular"
+        )
+
+    @staticmethod
+    def _season_round_type_map(max_round: int) -> Dict[int, str]:
+        finals_round_numbers = list(
+            range(max_round - len(FINALS_ROUND_LABELS) + 2, max_round + 1)
+        )
+
+        return {round_number: "Finals" for round_number in finals_round_numbers}
 
     def _convert_to_players(self, base_match_data_frame: pd.DataFrame) -> pd.DataFrame:
         match_count = len(base_match_data_frame)
