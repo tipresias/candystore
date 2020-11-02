@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker run --rm -it $PWD:/app candystore_tests
+docker run --rm -v $PWD:/app candystore_tests

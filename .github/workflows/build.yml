@@ -41,7 +41,7 @@ jobs:
         run: black candystore tests --check
       - name: Run tests
         if: ${{ always() }}
-        run: coverage run -m pytest
+        run: coverage run -m pytest --ignore tests/integration/
       - name: Upload test coverage report
         # Only do test coverage on latest version of Python to avoid duplication
         if: ${{ matrix.python-version }} == 3.8
@@ -49,3 +49,11 @@ jobs:
           coverage xml
           ./cc-test-reporter format-coverage -t coverage.py
           ./cc-test-reporter upload-coverage
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the docker image
+        run: docker build -t candystore_tests .
+      - name: Run integration tests
+        run: ./scripts/integration_tests.sh

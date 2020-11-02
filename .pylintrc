@@ -1,0 +1,4 @@
+[MASTER]
+# Integration tests require R & rpy2, which aren't available
+# in the standard environment
+ignore=integration
