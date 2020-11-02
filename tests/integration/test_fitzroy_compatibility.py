@@ -1,5 +1,7 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring,redefined-outer-name
 # pylint: disable=no-member
+import re
+
 import pytest
 from rpy2.robjects import packages, pandas2ri
 import pandas as pd
@@ -14,7 +16,9 @@ fitzroy = packages.importr("fitzRoy")
 
 
 def clean_column_names(data_frame: pd.DataFrame):
-    return data_frame.rename(columns=lambda col: col.replace(".", "_").lower())
+    return data_frame.rename(
+        columns=lambda col: re.sub(r"^\.+|\.+$", "", col).replace(".", "_").lower()
+    )
 
 
 fixtures = clean_column_names(fitzroy.get_fixture())

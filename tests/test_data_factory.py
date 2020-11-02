@@ -76,14 +76,14 @@ PLAYER_COLUMNS = {
     "hq4b",
     "home_score",
     "away_team",
-    "aw1g",
-    "aw1b",
-    "aw2g",
-    "aw2b",
-    "aw3g",
-    "aw3b",
-    "aw4g",
-    "aw4b",
+    "aq1g",
+    "aq1b",
+    "aq2g",
+    "aq2b",
+    "aq3g",
+    "aq3b",
+    "aq4g",
+    "aq4b",
     "away_score",
     "first_name",
     "surname",
@@ -118,6 +118,17 @@ PLAYER_COLUMNS = {
     "umpire_3",
     "umpire_4",
     "group_id",
+}
+
+# Sorting rounds with a mix of numbers and finals round labels is tricky, so we map
+# the labels to arbitrary numbers that are much larger than any realistic round number.
+BIG_NUMBER = 999
+FINALS_ROUND_MAP = {
+    "QF": BIG_NUMBER - 4,
+    "EF": BIG_NUMBER - 3,
+    "SF": BIG_NUMBER - 2,
+    "PF": BIG_NUMBER - 1,
+    "GF": BIG_NUMBER,
 }
 
 
@@ -276,6 +287,14 @@ def test_date_round_compatibility(data_factory, data_type, round_label):
         date_sorted_rounds = season_data_frame.sort_values("date")[
             round_label
         ].to_numpy()
-        sorted_rounds = season_data_frame[round_label].sort_values().to_numpy()
+        sorted_rounds = (
+            season_data_frame[round_label]
+            .sort_values(
+                key=lambda col: col.map(
+                    lambda val: FINALS_ROUND_MAP.get(val) or int(val)
+                )
+            )
+            .to_numpy()
+        )
 
         assert (date_sorted_rounds == sorted_rounds).all()
