@@ -18,4 +18,6 @@ RUN Rscript requirements.R
 
 COPY . .
 
-CMD ["pytest"]
+# We only run the integration tests inside Docker, because the rest
+# can be run normally
+CMD ["pytest", "-vv", "tests/integration/"]
