@@ -8,117 +8,15 @@ import pytest
 from candystore.data_factory import CandyStore, FIRST_AFL_SEASON
 
 
-FIXTURE_COLUMNS = {
-    "date",
-    "season",
-    "season_game",
-    "round",
-    "home_team",
-    "away_team",
-    "venue",
-}
-
-BETTING_COLUMNS = {
-    "date",
-    "season",
-    "round_number",
-    "round",
-    "home_team",
-    "away_team",
-    "home_score",
-    "away_score",
-    "home_margin",
-    "away_margin",
-    "home_win_odds",
-    "away_win_odds",
-    "home_win_paid",
-    "away_win_paid",
-    "home_line_odds",
-    "away_line_odds",
-    "home_line_paid",
-    "away_line_paid",
-    "venue",
-}
-
-MATCH_COLUMNS = {
-    "date",
-    "game",
-    "season",
-    "round",
-    "round_number",
-    "round_type",
-    "home_team",
-    "home_goals",
-    "home_behinds",
-    "home_points",
-    "away_team",
-    "away_goals",
-    "away_behinds",
-    "away_points",
-    "margin",
-    "venue",
-}
-
-PLAYER_COLUMNS = {
-    "season",
-    "round",
-    "date",
-    "local_start_time",
-    "venue",
-    "attendance",
-    "home_team",
-    "hq1g",
-    "hq1b",
-    "hq2g",
-    "hq2b",
-    "hq3g",
-    "hq3b",
-    "hq4g",
-    "hq4b",
-    "home_score",
-    "away_team",
-    "aw1g",
-    "aw1b",
-    "aw2g",
-    "aw2b",
-    "aw3g",
-    "aw3b",
-    "aw4g",
-    "aw4b",
-    "away_score",
-    "first_name",
-    "surname",
-    "id",
-    "jumper_no",
-    "playing_for",
-    "kicks",
-    "marks",
-    "handballs",
-    "goals",
-    "behinds",
-    "hit_outs",
-    "tackles",
-    "rebounds",
-    "inside_50s",
-    "clearances",
-    "clangers",
-    "frees_for",
-    "frees_against",
-    "brownlow_votes",
-    "contested_possessions",
-    "uncontested_possessions",
-    "contested_marks",
-    "marks_inside_50",
-    "one_percenters",
-    "bounces",
-    "goal_assists",
-    "time_on_ground",
-    "substitute",
-    "umpire_1",
-    "umpire_2",
-    "umpire_3",
-    "umpire_4",
-    "group_id",
+# Sorting rounds with a mix of numbers and finals round labels is tricky, so we map
+# the labels to arbitrary numbers that are much larger than any realistic round number.
+BIG_NUMBER = 999
+FINALS_ROUND_MAP = {
+    "QF": BIG_NUMBER - 4,
+    "EF": BIG_NUMBER - 3,
+    "SF": BIG_NUMBER - 2,
+    "PF": BIG_NUMBER - 1,
+    "GF": BIG_NUMBER,
 }
 
 
@@ -202,35 +100,21 @@ def test_tuple_season_count(tuple_seasons):
 
 
 @pytest.mark.parametrize(
-    [
-        "data_type",
-        "expected_columns",
-    ],
-    [
-        ("fixtures", FIXTURE_COLUMNS),
-        ("betting_odds", BETTING_COLUMNS),
-        ("match_results", MATCH_COLUMNS),
-        ("players", PLAYER_COLUMNS),
-    ],
+    "data_type", ["fixtures", "betting_odds", "match_results", "players"]
 )
-def test_data_structure(data_factory, data_type, expected_columns):
+def test_data_structure(data_factory, data_type):
     data = getattr(data_factory, data_type)()
 
     # It returns a list of fixture dictionaries
     assert isinstance(data, list)
     assert isinstance(data[0], dict)
-    data_columns = set(data[0].keys())
-    assert expected_columns & data_columns == expected_columns
 
     # It returns a data frame
     data_frame = getattr(data_factory, data_type)(to_dict=None)
     assert isinstance(data_frame, pd.DataFrame)
 
 
-@pytest.mark.parametrize(
-    "data_type",
-    ["fixtures", "betting_odds", "match_results"],
-)
+@pytest.mark.parametrize("data_type", ["fixtures", "betting_odds", "match_results"])
 def test_no_duplicate_teams(data_factory, data_type):
     data = getattr(data_factory, data_type)()
     data_frame = pd.DataFrame(data)
@@ -242,10 +126,7 @@ def test_no_duplicate_teams(data_factory, data_type):
         assert len(teams) == len(np.unique(teams))
 
 
-@pytest.mark.parametrize(
-    "data_type",
-    ["fixtures", "betting_odds", "match_results"],
-)
+@pytest.mark.parametrize("data_type", ["fixtures", "betting_odds", "match_results"])
 def test_no_duplicate_brisbanes(data_factory, data_type):
     data = getattr(data_factory, data_type)()
     data_frame = pd.DataFrame(data)
@@ -262,7 +143,7 @@ def test_no_duplicate_brisbanes(data_factory, data_type):
     ["data_type", "round_label"],
     [
         ("fixtures", "round"),
-        ("betting_odds", "round_number"),
+        ("betting_odds", "round"),
         ("match_results", "round_number"),
         ("players", "round"),
     ],
@@ -277,6 +158,14 @@ def test_date_round_compatibility(data_factory, data_type, round_label):
         date_sorted_rounds = season_data_frame.sort_values("date")[
             round_label
         ].to_numpy()
-        sorted_rounds = season_data_frame[round_label].sort_values().to_numpy()
+        sorted_rounds = (
+            season_data_frame[round_label]
+            .sort_values(
+                key=lambda col: col.map(
+                    lambda val: FINALS_ROUND_MAP.get(val) or int(val)
+                )
+            )
+            .to_numpy()
+        )
 
         assert (date_sorted_rounds == sorted_rounds).all()

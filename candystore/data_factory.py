@@ -1,6 +1,7 @@
+# pylint: disable=too-many-lines
 """For generating fake fixture data."""
 
-from typing import Tuple, Union, List, Optional
+from typing import Tuple, Union, List, Optional, Dict
 from datetime import date, datetime, timedelta
 import itertools
 import math
@@ -32,8 +33,7 @@ BettingData = TypedDict(
     {
         "date": datetime,
         "season": int,
-        "round_number": int,
-        "round": str,
+        "round": int,
         "home_team": str,
         "away_team": str,
         "home_score": int,
@@ -78,7 +78,7 @@ PlayerData = TypedDict(
     "PlayerData",
     {
         "season": int,
-        "round": int,
+        "round": str,
         "date": str,
         "local_start_time": str,
         "venue": str,
@@ -94,14 +94,14 @@ PlayerData = TypedDict(
         "hq4b": int,
         "home_score": int,
         "away_team": str,
-        "aw1g": int,
-        "aw1b": int,
-        "aw2g": int,
-        "aw2b": int,
-        "aw3g": int,
-        "aw3b": int,
-        "aw4g": int,
-        "aw4b": int,
+        "aq1g": int,
+        "aq1b": int,
+        "aq2g": int,
+        "aq2b": int,
+        "aq3g": int,
+        "aq3b": int,
+        "aq4g": int,
+        "aq4b": int,
         "away_score": int,
         "first_name": str,
         "surname": str,
@@ -170,6 +170,8 @@ MAX_MATCH_HOUR = 20
 
 WEEK_IN_DAYS = 7
 DAY_IN_HOURS = 24
+
+FINALS_ROUND_LABELS = ["QF", "EF", "SF", "PF", "GF"]
 
 # Reasonable ranges are two standard deviations plus/minus from the means
 # for all recorded AFL matches
@@ -399,11 +401,10 @@ class CandyStore:
             {
                 "date": "1967-03-21 18:40:59",
                 "season": 1967,
-                "round": "Round 1",
                 "home_team": "Sydney",
                 "away_team": "Fremantle",
                 "venue": "Wellington",
-                "round_number": 1,
+                "round": 1,
                 "home_score": 26,
                 "away_score": 89,
                 "home_margin": -63,
@@ -511,14 +512,14 @@ class CandyStore:
                 "hq4g": 3,
                 "hq4b": 4,
                 "home_score": 67,
-                "aw1g": 1,
-                "aw1b": 2,
-                "aw2g": 5,
-                "aw2b": 1,
-                "aw3g": 0,
-                "aw3b": 1,
-                "aw4g": 2,
-                "aw4b": 1,
+                "aq1g": 1,
+                "aq1b": 2,
+                "aq2g": 5,
+                "aq2b": 1,
+                "aq3g": 0,
+                "aq3b": 1,
+                "aq4g": 2,
+                "aq4b": 1,
                 "away_score": 67,
                 "umpire_1": "William Mayo",
                 "umpire_2": "Justin Washington",
@@ -589,8 +590,6 @@ class CandyStore:
         away_win_odds = BASELINE_BET_PAYOUT - home_win_odds_diff
 
         return base_match_data_frame.assign(
-            round_number=lambda df: df["round"],
-            round=lambda df: "Round " + df["round"].astype(str),
             home_score=home_score,
             away_score=away_score,
             home_margin=home_score - away_score,
@@ -600,13 +599,14 @@ class CandyStore:
             home_win_paid=home_win_odds * (home_score > away_score).astype(int),
             away_win_paid=away_win_odds * (away_score > home_score).astype(int),
             home_line_odds=home_line_odds,
-            away_line_odds=-1 * home_line_odds,
+            away_line_odds=home_line_odds * -1,
             home_line_paid=BASELINE_BET_PAYOUT * (home_score > away_score).astype(int),
             away_line_paid=BASELINE_BET_PAYOUT * (away_score > home_score).astype(int),
         ).astype({"date": str})
 
-    @staticmethod
-    def _convert_to_matches(base_match_data_frame: pd.DataFrame) -> List[MatchData]:
+    def _convert_to_matches(
+        self, base_match_data_frame: pd.DataFrame
+    ) -> List[MatchData]:
         match_count = len(base_match_data_frame)
 
         home_goals, away_goals = (
@@ -624,9 +624,9 @@ class CandyStore:
         return base_match_data_frame.assign(
             date=lambda df: df["date"].dt.date.astype(str),
             game=lambda df: df.groupby("season").cumcount(),
+            round_type=self._map_round_type,
             round_number=lambda df: df["round"],
             round=lambda df: "R" + df["round"].astype(str),
-            round_type="Regular",
             home_goals=home_goals,
             home_behinds=home_behinds,
             home_points=home_points,
@@ -636,6 +636,30 @@ class CandyStore:
             # fitzRoy gets the margin by always subtracting away points from home points
             margin=home_points - away_points,
         )
+
+    def _map_round_type(self, match_data_frame: pd.DataFrame) -> pd.Series:
+        return pd.concat(
+            [
+                self._map_round_type_per_season(season_group)
+                for _season, season_group in match_data_frame.groupby("season")
+            ]
+        )
+
+    def _map_round_type_per_season(self, season_group: pd.DataFrame) -> pd.Series:
+        max_round = season_group["round"].max()
+        finals_round_map = self._season_round_type_map(max_round)
+
+        return season_group["round"].map(
+            lambda round: finals_round_map.get(round) or "Regular"
+        )
+
+    @staticmethod
+    def _season_round_type_map(max_round: int) -> Dict[int, str]:
+        finals_round_numbers = list(
+            range(max_round - len(FINALS_ROUND_LABELS) + 2, max_round + 1)
+        )
+
+        return {round_number: "Finals" for round_number in finals_round_numbers}
 
     def _convert_to_players(self, base_match_data_frame: pd.DataFrame) -> pd.DataFrame:
         match_count = len(base_match_data_frame)
@@ -655,6 +679,7 @@ class CandyStore:
 
         player_match_data = (
             base_match_data_frame.assign(
+                round=self._map_player_round,
                 local_start_time=self._parse_player_start_time,
                 date=lambda df: df["date"].dt.date.astype(str),
                 attendance=np.random.randint(
@@ -670,14 +695,14 @@ class CandyStore:
                 hq4b=home_quarter_behinds[3],
                 home_score=(np.sum(home_quarter_goals, axis=0) * 6)
                 + np.sum(home_quarter_behinds, axis=0),
-                aw1g=away_quarter_goals[0],
-                aw1b=away_quarter_behinds[0],
-                aw2g=away_quarter_goals[1],
-                aw2b=away_quarter_behinds[1],
-                aw3g=away_quarter_goals[2],
-                aw3b=away_quarter_behinds[2],
-                aw4g=away_quarter_goals[3],
-                aw4b=away_quarter_behinds[3],
+                aq1g=away_quarter_goals[0],
+                aq1b=away_quarter_behinds[0],
+                aq2g=away_quarter_goals[1],
+                aq2b=away_quarter_behinds[1],
+                aq3g=away_quarter_goals[2],
+                aq3b=away_quarter_behinds[2],
+                aq4g=away_quarter_goals[3],
+                aq4b=away_quarter_behinds[3],
                 away_score=(np.sum(home_quarter_goals, axis=0) * 6)
                 + np.sum(home_quarter_behinds, axis=0),
                 umpire_1=np.array([FAKE.name() for _ in range(match_count)]),
@@ -810,8 +835,42 @@ class CandyStore:
             }
         )
 
+    def _map_player_round(self, player_data_frame: pd.DataFrame) -> pd.Series:
+        return pd.concat(
+            [
+                self._map_player_round_per_season(season_group)
+                for _season, season_group in player_data_frame.groupby("season")
+            ]
+        ).astype(str)
+
+    def _map_player_round_per_season(self, season_group: pd.DataFrame) -> pd.Series:
+        max_round = season_group["round"].max()
+        finals_round_map = self._season_finals_round_map(max_round)
+
+        return season_group["round"].map(
+            lambda round: finals_round_map.get(round) or round
+        )
+
     @staticmethod
-    def _parse_player_start_time(player_data_frame: pd.DataFrame) -> int:
+    def _season_finals_round_map(max_round: int) -> Dict[int, str]:
+        finals_round_numbers = enumerate(
+            range(max_round - len(FINALS_ROUND_LABELS) + 2, max_round + 1)
+        )
+        # First two finals labels (EF & QF) apply to the first round of finals
+        # (i.e. they take place in the same week), so we randomly divy them up
+        # for the first round before proceeding with one label per round
+        round_label = lambda idx: (
+            np.random.choice(FINALS_ROUND_LABELS[:2])
+            if idx == 0
+            else FINALS_ROUND_LABELS[idx + 1]
+        )
+
+        return {
+            round_number: round_label(idx) for idx, round_number in finals_round_numbers
+        }
+
+    @staticmethod
+    def _parse_player_start_time(player_data_frame: pd.DataFrame) -> pd.Series:
         # It's a little wonky, but for player data, fitzRoy returns match times
         # in the form of 'hhmm' as an integer
         return (

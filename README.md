@@ -27,3 +27,15 @@ candy.fixtures()
 ## Documentation
 
 More-detailed documentation can be found at https://candystore.readthedocs.io/en/latest/
+
+## Setting up dev environment
+
+- Install Docker
+- Build Docker image for integration tests:
+  ```bash
+  docker build -t candystore_tests .
+  ```
+- ```bash
+  pip3 install -r requirements.txt
+  ```
+- Run tests with the script file `./scripts/tests.sh`
