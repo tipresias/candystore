@@ -29,7 +29,7 @@ jobs:
           ./cc-test-reporter before-build
       - name: Lint
         if: ${{ always() }}
-        run: pylint candystore tests
+        run: pylint --disable=R candystore tests
       - name: Check types
         if: ${{ always() }}
         run: mypy candystore tests
