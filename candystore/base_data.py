@@ -14,32 +14,11 @@ import pandas as pd
 
 from .fixtures import convert_to_fixtures, FixtureData
 from .betting_odds import convert_to_betting_odds, BettingData
+from .match_results import convert_to_match_results, MatchResultsData
 
 
 SeasonRange = Tuple[int, int]
 
-
-MatchData = TypedDict(
-    "MatchData",
-    {
-        "date": str,
-        "game": int,
-        "season": int,
-        "round": str,
-        "round_number": int,
-        "round_type": str,
-        "home_team": str,
-        "home_goals": int,
-        "home_behinds": int,
-        "home_points": int,
-        "away_team": str,
-        "away_goals": int,
-        "away_behinds": int,
-        "away_points": int,
-        "margin": int,
-        "venue": str,
-    },
-)
 
 PlayerData = TypedDict(
     "PlayerData",
@@ -389,7 +368,7 @@ class CandyStore:
 
     def match_results(
         self, to_dict: Optional[str] = "records"
-    ) -> Union[pd.DataFrame, List[MatchData]]:
+    ) -> Union[pd.DataFrame, List[MatchResultsData]]:
         """Generate match results data data for the given seasons.
 
         Parameters
@@ -427,7 +406,7 @@ class CandyStore:
                 "margin": -120
             }
         """
-        match_data_frame = self._base_matches.pipe(self._convert_to_matches)
+        match_data_frame = self._base_matches.pipe(convert_to_match_results)
 
         return (
             match_data_frame if to_dict is None else match_data_frame.to_dict(to_dict)
@@ -521,63 +500,6 @@ class CandyStore:
         return (
             player_data_frame if to_dict is None else player_data_frame.to_dict(to_dict)
         )
-
-    def _convert_to_matches(
-        self, base_match_data_frame: pd.DataFrame
-    ) -> List[MatchData]:
-        match_count = len(base_match_data_frame)
-
-        home_goals, away_goals = (
-            np.random.randint(*REASONABLE_GOAL_RANGE, size=match_count),
-            np.random.randint(*REASONABLE_GOAL_RANGE, size=match_count),
-        )
-        home_behinds, away_behinds = (
-            np.random.randint(*REASONABLE_BEHIND_RANGE, size=match_count),
-            np.random.randint(*REASONABLE_BEHIND_RANGE, size=match_count),
-        )
-        home_points, away_points = (home_goals * 6) + home_behinds, (
-            away_goals * 6
-        ) + away_behinds
-
-        return base_match_data_frame.assign(
-            date=lambda df: df["date"].dt.date.astype(str),
-            game=lambda df: df.groupby("season").cumcount(),
-            round_type=self._map_round_type,
-            round_number=lambda df: df["round"],
-            round=lambda df: "R" + df["round"].astype(str),
-            home_goals=home_goals,
-            home_behinds=home_behinds,
-            home_points=home_points,
-            away_goals=away_goals,
-            away_behinds=away_behinds,
-            away_points=away_points,
-            # fitzRoy gets the margin by always subtracting away points from home points
-            margin=home_points - away_points,
-        )
-
-    def _map_round_type(self, match_data_frame: pd.DataFrame) -> pd.Series:
-        return pd.concat(
-            [
-                self._map_round_type_per_season(season_group)
-                for _season, season_group in match_data_frame.groupby("season")
-            ]
-        )
-
-    def _map_round_type_per_season(self, season_group: pd.DataFrame) -> pd.Series:
-        max_round = season_group["round"].max()
-        finals_round_map = self._season_round_type_map(max_round)
-
-        return season_group["round"].map(
-            lambda round: finals_round_map.get(round) or "Regular"
-        )
-
-    @staticmethod
-    def _season_round_type_map(max_round: int) -> Dict[int, str]:
-        finals_round_numbers = list(
-            range(max_round - len(FINALS_ROUND_LABELS) + 2, max_round + 1)
-        )
-
-        return {round_number: "Finals" for round_number in finals_round_numbers}
 
     def _convert_to_players(self, base_match_data_frame: pd.DataFrame) -> pd.DataFrame:
         match_count = len(base_match_data_frame)
