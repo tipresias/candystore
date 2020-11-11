@@ -12,21 +12,11 @@ from mypy_extensions import TypedDict
 import numpy as np
 import pandas as pd
 
+from .fixtures import convert_to_fixtures, FixtureData
+
 
 SeasonRange = Tuple[int, int]
 
-FixtureData = TypedDict(
-    "FixtureData",
-    {
-        "date": str,
-        "season": int,
-        "season_game": int,
-        "round": int,
-        "home_team": str,
-        "away_team": str,
-        "venue": str,
-    },
-)
 
 BettingData = TypedDict(
     "BettingData",
@@ -368,7 +358,7 @@ class CandyStore:
                 "venue": "Sydney Showground"
             }
         """
-        fixtures_data_frame = self._base_matches.pipe(self._convert_to_fixtures)
+        fixtures_data_frame = self._base_matches.pipe(convert_to_fixtures)
 
         return (
             fixtures_data_frame
@@ -561,12 +551,6 @@ class CandyStore:
         return (
             player_data_frame if to_dict is None else player_data_frame.to_dict(to_dict)
         )
-
-    @staticmethod
-    def _convert_to_fixtures(base_match_data_frame: pd.DataFrame) -> List[FixtureData]:
-        return base_match_data_frame.assign(
-            season_game=lambda df: df.groupby("season").cumcount()
-        ).astype({"date": str})
 
     @staticmethod
     def _convert_to_betting_odds(
