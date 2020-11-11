@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from candystore.data_factory import CandyStore, FIRST_AFL_SEASON
+from candystore import CandyStore
+from candystore.base_data import FIRST_AFL_SEASON
 
 
 # Sorting rounds with a mix of numbers and finals round labels is tricky, so we map
