@@ -8,7 +8,7 @@ import pandas as pd
 from pandas.api.types import is_string_dtype, is_numeric_dtype, is_datetime64_dtype
 import numpy as np
 
-from candystore.base_data import CandyStore
+from candystore import CandyStore
 
 pandas2ri.activate()
 
