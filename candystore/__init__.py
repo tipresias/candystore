@@ -35,7 +35,7 @@ class CandyStore:
         self._base_data = generate_base_data(seasons)
 
     def fixtures(
-        self, to_dict: Optional[str] = "records"
+        self, to_dict: Optional[str] = None
     ) -> Union[pd.DataFrame, List[FixtureData]]:
         """Generate fixture data for the given seasons.
 
@@ -48,8 +48,9 @@ class CandyStore:
         Returns
         -------
         pd.DataFrame or list(dict)
-            List of fixture dictionaries that replicate fitzRoy's `get_fixture`\
-            function, but with Pythonic conventions (e.g. snake_case keys)
+            DataFrame or list of fixture dictionaries that replicate \
+            fitzRoy's `get_fixture` function, but with Pythonic conventions \
+            (e.g. snake_case keys)
 
         Examples
         --------
@@ -74,7 +75,7 @@ class CandyStore:
         )
 
     def betting_odds(
-        self, to_dict: Optional[str] = "records"
+        self, to_dict: Optional[str] = None
     ) -> Union[pd.DataFrame, List[BettingData]]:
         """Generate betting odds data for the given seasons.
 
@@ -87,7 +88,7 @@ class CandyStore:
         Returns
         -------
         pd.DataFrame or list(dict)
-            List of betting odds dictionaries that replicate fitzRoy's\
+            DataFrame or list of betting odds dictionaries that replicate fitzRoy's\
             `get_footywire_betting_odds` function, but with Pythonic conventions\
             (e.g. snake_case keys)
 
@@ -125,7 +126,7 @@ class CandyStore:
         )
 
     def match_results(
-        self, to_dict: Optional[str] = "records"
+        self, to_dict: Optional[str] = None
     ) -> Union[pd.DataFrame, List[MatchResultsData]]:
         """Generate match results data data for the given seasons.
 
@@ -138,8 +139,9 @@ class CandyStore:
         Returns
         -------
         pd.DataFrame or list(dict)
-            Match data that replicate fitzRoy's `get_match_results` function,\
-            but with Pythonic conventions (e.g. snake_case keys)
+            DataFrame or list of match dictionaries that replicate \
+            fitzRoy's `get_match_results` function, but with Pythonic conventions \
+            (e.g. snake_case keys)
 
         Examples
         --------
@@ -171,7 +173,7 @@ class CandyStore:
         )
 
     def players(
-        self, to_dict: Optional[str] = "records"
+        self, to_dict: Optional[str] = None
     ) -> Union[pd.DataFrame, List[PlayerData]]:
         """Generate player data data for the given seasons.
 
@@ -184,8 +186,9 @@ class CandyStore:
         Returns
         -------
         pd.DataFrame or list(dict)
-            Player data that replicate fitzRoy's `get_afltables_stats` function,\
-            but with Pythonic conventions (e.g. snake_case keys)
+            DataFrame or list of player dictionaries that replicate \
+            fitzRoy's `get_afltables_stats` function, but with Pythonic conventions \
+            (e.g. snake_case keys)
 
         Examples
         --------
