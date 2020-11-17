@@ -104,14 +104,14 @@ def test_tuple_season_count(tuple_seasons):
     "data_type", ["fixtures", "betting_odds", "match_results", "players"]
 )
 def test_data_structure(data_factory, data_type):
-    data = getattr(data_factory, data_type)()
+    data = getattr(data_factory, data_type)(to_dict="records")
 
     # It returns a list of fixture dictionaries
     assert isinstance(data, list)
     assert isinstance(data[0], dict)
 
     # It returns a data frame
-    data_frame = getattr(data_factory, data_type)(to_dict=None)
+    data_frame = getattr(data_factory, data_type)()
     assert isinstance(data_frame, pd.DataFrame)
 
 
