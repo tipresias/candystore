@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="candystore",
-    version="0.2.1",
+    version="0.3.0",
     author="Craig Franklin",
     author_email="craigjfranklin@gmail.com",
     description="Factories for randomised AFL data sets for testing purposes",
