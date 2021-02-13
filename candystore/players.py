@@ -113,12 +113,10 @@ BROWNLOW_VOTES_RANGE = (0, 4)
 N_PLAYERS_PER_TEAM = 22
 
 
-def _calculate_quarter_values(
-    value_range: Tuple[int, int], size: int
-) -> List[np.array]:
-    return [
-        (np.random.randint(*value_range, size=size) / 4).astype(int) for _ in range(4)
-    ]
+def _calculate_quarter_values(value_range: Tuple[int, int], size: int) -> np.ndarray:
+    return np.array(
+        [(np.random.randint(*value_range, size=size) / 4).astype(int) for _ in range(4)]
+    )
 
 
 def _parse_player_start_time(player_data_frame: pd.DataFrame) -> pd.Series:
