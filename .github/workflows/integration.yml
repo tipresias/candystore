@@ -1,0 +1,15 @@
+name: fitzRoy integration
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the docker image
+        run: docker build -t candystore_tests .
+      - name: Run integration tests
+        run: ./scripts/integration_tests.sh
