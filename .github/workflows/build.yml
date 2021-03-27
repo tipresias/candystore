@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
     env:
       CC_TEST_REPORTER_ID: d60734b9fc6663df40df650f2867d005e145acd5f741f34505a5e405f79ea784
     steps:
@@ -44,7 +44,7 @@ jobs:
         run: coverage run -m pytest --ignore tests/integration/
       - name: Upload test coverage report
         # Only do test coverage on latest version of Python to avoid duplication
-        if: ${{ matrix.python-version }} == 3.8
+        if: ${{ matrix.python-version }} == 3.9
         run: |
           coverage xml
           ./cc-test-reporter format-coverage -t coverage.py
