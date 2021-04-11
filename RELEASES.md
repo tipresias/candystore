@@ -1,5 +1,11 @@
 # Releases
 
+## v0.3.3
+
+### Chores
+
+- Update dependencies
+
 ## v0.3.2
 
 ### Bug fixes
