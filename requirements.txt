@@ -9,7 +9,7 @@ sphinx
 
 # Testing/Linting
 pylint>=2.0,<3.0
-black==21.4b0
+black==21.4b2
 pydocstyle>=5.0,<7.0
 pytest>=5.0,<7.0
 coverage
