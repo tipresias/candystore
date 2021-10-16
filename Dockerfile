@@ -4,7 +4,10 @@
 FROM rocker/tidyverse:4.0.0-ubuntu18.04
 
 RUN apt-get --no-install-recommends update \
-  && apt-get -y --no-install-recommends install software-properties-common \
+  && apt-get -y --no-install-recommends install \
+  software-properties-common \
+  libffi6 \
+  libffi-dev \
   && add-apt-repository ppa:deadsnakes/ppa
 # We need tzdata to avoid the following from readr:
 # Warning in OlsonNames() : no Olson database found
