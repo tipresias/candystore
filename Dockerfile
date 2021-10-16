@@ -4,7 +4,10 @@
 FROM rocker/tidyverse:4.0.0-ubuntu18.04
 
 RUN apt-get --no-install-recommends update \
-  && apt-get -y --no-install-recommends install software-properties-common \
+  && apt-get -y --no-install-recommends install \
+  software-properties-common \
+  libffi6 \
+  libffi-dev \
   && add-apt-repository ppa:deadsnakes/ppa
 # We need tzdata to avoid the following from readr:
 # Warning in OlsonNames() : no Olson database found
@@ -13,6 +16,7 @@ RUN apt-get -y --no-install-recommends install \
   tzdata \
   python3-setuptools \
   python3-pip \
+  python3.8-dev \
   python3.8
 
 # Need to set Python 3.8 as the default to override the included Python 3.6
