@@ -18,7 +18,7 @@ setuptools.setup(
     install_requires=[
         "numpy>=1.0,<2.0",
         "pandas>=0.24.0,<2.0",
-        "faker>=4.0,<9.0",
+        "faker>=4.0,<10.0",
         "mypy>=0.70,<1.0",
     ],
     classifiers=[
