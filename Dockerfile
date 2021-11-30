@@ -8,6 +8,7 @@ RUN apt-get --no-install-recommends update \
   software-properties-common \
   libffi6 \
   libffi-dev \
+  libxml2 \
   && add-apt-repository ppa:deadsnakes/ppa
 # We need tzdata to avoid the following from readr:
 # Warning in OlsonNames() : no Olson database found
