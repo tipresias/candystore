@@ -41,7 +41,7 @@ jobs:
         run: black candystore tests --check
       - name: Run tests
         if: ${{ always() }}
-        run: coverage run -m pytest --ignore tests/integration/
+        run: coverage run -m pytest tests/unit
       - name: Upload test coverage report
         # Only do test coverage on latest version of Python to avoid duplication
         if: ${{ matrix.python-version }} == 3.9
