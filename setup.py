@@ -16,10 +16,10 @@ setuptools.setup(
     url="https://github.com/tipresias/candystore",
     packages=setuptools.find_packages(),
     install_requires=[
-        "numpy>=1.0,<2.0",
-        "pandas>=0.24.0,<2.0",
-        "faker>=4.0,<12.0",
-        "mypy>=0.70,<1.0",
+        "numpy",
+        "pandas",
+        "faker",
+        "mypy",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
