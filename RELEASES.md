@@ -1,5 +1,11 @@
 # Releases
 
+## v0.3.4
+
+### Chores
+
+- Remove dependency version limits: It's better to leave version limiting to end users to avoid conflicts with other packages. This also reduces maintenance work for the package.
+
 ## v0.3.3
 
 ### Chores

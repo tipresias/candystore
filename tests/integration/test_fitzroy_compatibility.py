@@ -3,16 +3,15 @@
 import re
 
 import pytest
+import rpy2.robjects as ro
 from rpy2.robjects import packages, pandas2ri
+from rpy2.robjects.conversion import localconverter
+
 import pandas as pd
 from pandas.api.types import is_string_dtype, is_numeric_dtype, is_datetime64_dtype
 import numpy as np
 
 from candystore import CandyStore
-
-pandas2ri.activate()
-
-fitzroy = packages.importr("fitzRoy")
 
 
 def clean_column_names(data_frame: pd.DataFrame):
@@ -21,16 +20,19 @@ def clean_column_names(data_frame: pd.DataFrame):
     )
 
 
-fixtures = clean_column_names(fitzroy.get_fixture())
-match_results = clean_column_names(fitzroy.get_match_results())
-players = clean_column_names(
-    fitzroy.get_afltables_stats(start_date="2019-01-01", end_date="2019-12-31")
-)
-betting_odds = clean_column_names(
-    fitzroy.get_footywire_betting_odds(start_season="2019", end_season="2019")
-)
+with localconverter(ro.default_converter + pandas2ri.converter):
+    fitzroy = packages.importr("fitzRoy")
 
-data_factory = CandyStore(seasons=np.random.randint(1, 10))
+    fixtures = clean_column_names(fitzroy.get_fixture())
+    match_results = clean_column_names(fitzroy.get_match_results())
+    players = clean_column_names(
+        fitzroy.get_afltables_stats(start_date="2019-01-01", end_date="2019-12-31")
+    )
+    betting_odds = clean_column_names(
+        fitzroy.get_footywire_betting_odds(start_season="2019", end_season="2019")
+    )
+
+    data_factory = CandyStore(seasons=np.random.randint(1, 10))
 
 
 @pytest.mark.parametrize(

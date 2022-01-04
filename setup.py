@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="candystore",
-    version="0.3.3",
+    version="0.3.4",
     author="Craig Franklin",
     author_email="craigjfranklin@gmail.com",
     description="Factories for randomised AFL data sets for testing purposes",
@@ -16,10 +16,10 @@ setuptools.setup(
     url="https://github.com/tipresias/candystore",
     packages=setuptools.find_packages(),
     install_requires=[
-        "numpy>=1.0,<2.0",
-        "pandas>=0.24.0,<2.0",
-        "faker>=4.0,<12.0",
-        "mypy>=0.70,<1.0",
+        "numpy",
+        "pandas",
+        "faker",
+        "mypy",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
